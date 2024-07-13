@@ -1,27 +1,26 @@
 import java.util.HashMap;
 
 class Bus {
+    static int busCounter = 1;
+    static HashMap<Bus, Route> busRoutes=new HashMap<>();
     private int busId;
     private String numberPlate;
-    private HashMap<Integer, Route> routes;
-
-    public Bus(int busId, String numberPlate, Route route) {
-        this.busId = busId;
+    public Bus(String numberPlate, Route route) {
+        this.busId = busCounter++;
         this.numberPlate = numberPlate;
-        this.routes = new HashMap<>();
-        this.routes.put(route.getRouteId(), route);
+        this.busRoutes.put(this, route);
     }
 
     public void addRoute(Route route) {
-        this.routes.put(route.getRouteId(), route);
+        this.busRoutes.put(this, route);
     }
 
     public Route getRoute(int routeId) {
-        return this.routes.get(routeId);
+        return busRoutes.get(this);
     }
 
     public int getBusId() {
-        return busId;
+        return this.busId;
     }
 
     public void setBusId(int busId) {
@@ -29,19 +28,19 @@ class Bus {
     }
 
     public String getNumberPlate() {
-        return numberPlate;
+        return this.numberPlate;
     }
 
     public void setNumberPlate(String numberPlate) {
         this.numberPlate = numberPlate;
     }
 
-    public HashMap<Integer, Route> getRoutes() {
-        return routes;
+    public HashMap<Bus, Route> getAllRoutes() {
+        return busRoutes;
     }
 
-    public void setRoutes(HashMap<Integer, Route> routes) {
-        this.routes = routes;
+    public void setRoute(Route route) {
+      busRoutes.put(this, route);
     }
 
     @Override
@@ -49,7 +48,7 @@ class Bus {
         return "Bus{" +
                 "busId=" + busId +
                 ", numberPlate='" + numberPlate + '\'' +
-                ", routes=" + routes +
+                ", routes=" + busRoutes.get(this) +
                 '}';
     }
 }
