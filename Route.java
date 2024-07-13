@@ -1,6 +1,8 @@
 import java.util.Arrays;
 
 class Route {
+    //java.sql.Time routeTime = resultSet.getTime("route_time");
+    static int routeCounter=1;
     private int routeId;
     private String startLocation;
     private String startTime;
@@ -9,7 +11,7 @@ class Route {
     private boolean[] daysOfWeek; // true if the route runs on that day, false otherwise
 
     public Route(int routeId, String startLocation, String startTime, String endLocation, String endTime, boolean[] daysOfWeek) {
-        this.routeId = routeId;
+        this.routeId = routeCounter++;
         this.startLocation = startLocation;
         this.startTime = startTime;
         this.endLocation = endLocation;
@@ -18,15 +20,15 @@ class Route {
     }
 
     public int getRouteId() {
-        return routeId;
+        return this.routeId;
     }
 
-    public void setRouteId(int routeId) {
-        this.routeId = routeId;
-    }
+    // public void setRouteId(int routeId) {
+    //     this.routeId = routeId;
+    // }
 
     public String getStartLocation() {
-        return startLocation;
+        return this.startLocation;
     }
 
     public void setStartLocation(String startLocation) {
@@ -34,7 +36,7 @@ class Route {
     }
 
     public String getStartTime() {
-        return startTime;
+        return this.startTime;
     }
 
     public void setStartTime(String startTime) {
@@ -42,7 +44,7 @@ class Route {
     }
 
     public String getEndLocation() {
-        return endLocation;
+        return this.endLocation;
     }
 
     public void setEndLocation(String endLocation) {
@@ -50,7 +52,7 @@ class Route {
     }
 
     public String getEndTime() {
-        return endTime;
+        return this.endTime;
     }
 
     public void setEndTime(String endTime) {
@@ -58,7 +60,7 @@ class Route {
     }
 
     public boolean[] getDaysOfWeek() {
-        return daysOfWeek;
+        return this.daysOfWeek;
     }
 
     public void setDaysOfWeek(boolean[] daysOfWeek) {
@@ -66,7 +68,7 @@ class Route {
     }
 
     public String getName() {
-        return startLocation + " to " + endLocation;
+        return this.startLocation + " to " + this.endLocation;
     }
 
     @Override
