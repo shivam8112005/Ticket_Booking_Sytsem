@@ -1,4 +1,7 @@
+import java.util.LinkedList;
+
 class DiscountPass {
+    public static LinkedList<DiscountPass> allDP=new LinkedList<>(); 
     private int passId;
     private String passType;
     private double discountPercentage;
@@ -7,6 +10,7 @@ class DiscountPass {
         this.passId = passId;
         this.passType = passType;
         this.discountPercentage = discountPercentage;
+        allDP.add(this);
     }
 
     public int getPassId() {
