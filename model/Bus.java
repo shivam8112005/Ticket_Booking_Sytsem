@@ -1,43 +1,88 @@
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 class Bus {
+    private Scanner scanner = new Scanner(System.in);
+    private static LinkedList<Bus> allBus = new LinkedList<>();
     static int busCounter = 1;
-    static HashMap<Bus, Route> busRoutes=new HashMap<>();
+
     private int busId;
     private String numberPlate;
-    public Bus(String numberPlate, Route route) {
+    private Route route;
+
+    public Bus() {
         this.busId = busCounter++;
-        this.numberPlate = numberPlate;
-        this.busRoutes.put(this, route);
-    }
-    public void addRoute(Route route) {
-        this.busRoutes.put(this, route);
-    }
-    public Route getRoute(int routeId) {
-        return busRoutes.get(this);
-    }
-    public int getBusId() {
-        return this.busId;
+        setNumberPlate();
+        setRoute();
+        allBus.add(this);
     }
 
-    public void setBusId(int busId) {
-        this.busId = busId;
+    public int getBusId() {
+        return this.busId;
     }
 
     public String getNumberPlate() {
         return this.numberPlate;
     }
 
-    public void setNumberPlate(String numberPlate) {
-        this.numberPlate = numberPlate;
+    public void setNumberPlate() {
+        String platePattern = "^[A-Z]{2}[0-9]{2} [A-Z]{1,2} [0-9]{1,4}$";
+        while (true) {
+            System.out.print("Enter number plate: ");
+            String input = scanner.nextLine();
+            if (Pattern.matches(platePattern, input)) {
+                this.numberPlate = input;
+                break;
+            } else {
+                System.out.println("Invalid number plate format. Please re-enter.");
+            }
+        }
     }
 
-    public HashMap<Bus, Route> getAllRoutes() {
-        return busRoutes;
+    public void setRoute() {
+        while (true) {
+            System.out.println("Available routes:");
+            for (Route route : Route.getAllRoute()) {
+                System.out.println(route.getRouteId() + ": " + route.getName());
+            }
+            System.out.println("0: Add new route");
+
+            System.out.print("Select a route by entering the route ID: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                this.route = new Route();
+                break;
+            } else {
+                boolean found = false;
+                for (Route route : Route.getAllRoute()) {
+                    if (route.getRouteId() == choice) {
+                        this.route = route;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    break;
+                } else {
+                    System.out.println("Invalid route ID. Please try again.");
+                }
+            }
+        }
     }
 
-    public void setRoute(Route route) {
-      busRoutes.put(this, route);
+    public static LinkedList<Bus> getAllBus() {
+        return allBus;
+    }
+
+    public static int getBusCounter() {
+        return busCounter;
+    }
+
+    public Route getRoute() {
+        return route;
     }
 
     @Override
@@ -45,7 +90,7 @@ class Bus {
         return "Bus{" +
                 "busId=" + busId +
                 ", numberPlate='" + numberPlate + '\'' +
-                ", routes=" + busRoutes.get(this) +
+                ", route=" + route.getName() +
                 '}';
     }
 }
