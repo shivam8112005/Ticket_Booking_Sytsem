@@ -5,22 +5,22 @@ import java.util.regex.Pattern;
 public class Admin {
     private Scanner scanner = new Scanner(System.in);
 
-    private String name;
+    private String username;
     private String password;
     private String phoneNumber;
 
-    private static HashMap<String, Admin> allAdmin = new HashMap<>();
+    static HashMap<String, Admin> allAdmin = new HashMap<>();
 
     public Admin() {
 
         setName();
         setPassword();
         setPhoneNumber();
-        allAdmin.put(name, this);
+        allAdmin.put(username, this);
     }
 
     public String getName() {
-        return name;
+        return username;
     }
 
     public Boolean checkPassword(String password) {
@@ -45,7 +45,7 @@ public class Admin {
             }
         }
 
-        this.name = name;
+        this.username = name;
     }
 
     public void setPhoneNumber() {
