@@ -1,80 +1,53 @@
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Scanner;
 
 class Ticket {
-    private int ticketId;
-    private long transactionTimestamp;
-    private HashMap<Integer, Bus> busMap;
-    private HashMap<Integer, Passenger> passengerMap;
-    private double price;
+    private static Scanner scanner = new Scanner(System.in);
+    private static LinkedList<Ticket> allTickets = new LinkedList<>();
+    private static int ticketCounter = 1;
 
-    public Ticket(int ticketId, Bus bus, Passenger passenger, double price) {
-        this.ticketId = ticketId;
+    private final int ticketId;
+    private final long transactionTimestamp;
+    private final double price;
+    private final Bus bus;
+    private final Passenger passenger;
+
+    public Ticket(int price, Bus bus, Passenger passenger) {
+        this.ticketId = ticketCounter++;
         this.transactionTimestamp = System.currentTimeMillis();
-        this.busMap = new HashMap<>();
-        this.busMap.put(bus.getBusId(), bus);
-        this.passengerMap = new HashMap<>();
-        this.passengerMap.put(passenger.getPassengerId(), passenger);
+
         this.price = price;
+        this.bus = bus;
+        this.passenger = passenger;
+        allTickets.add(this);
+    }
+
+    public static LinkedList<Ticket> getAllTickets() {
+        return allTickets;
+    }
+
+    public static int getTicketCounter() {
+        return ticketCounter;
     }
 
     public int getTicketId() {
         return ticketId;
     }
 
-    public void setTicketId(int ticketId) {
-        this.ticketId = ticketId;
-    }
-
     public long getTransactionTimestamp() {
         return transactionTimestamp;
-    }
-
-    public void setTransactionTimestamp(long transactionTimestamp) {
-        this.transactionTimestamp = transactionTimestamp;
-    }
-
-    public HashMap<Integer, Bus> getBusMap() {
-        return busMap;
-    }
-
-    public void setBusMap(HashMap<Integer, Bus> busMap) {
-        this.busMap = busMap;
-    }
-
-    public HashMap<Integer, Passenger> getPassengerMap() {
-        return passengerMap;
-    }
-
-    public void setPassengerMap(HashMap<Integer, Passenger> passengerMap) {
-        this.passengerMap = passengerMap;
     }
 
     public double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public Bus getBus() {
+        return bus;
     }
 
-    public Route getRoute(int busId) {
-        return busMap.get(busId).getRoutes().values().iterator().next();
-    }
-
-    public String getStartLocation(int busId) {
-        return getRoute(busId).getStartLocation();
-    }
-
-    public String getEndLocation(int busId) {
-        return getRoute(busId).getEndLocation();
-    }
-
-    public String getStartTime(int busId) {
-        return getRoute(busId).getStartTime();
-    }
-
-    public String getEndTime(int busId) {
-        return getRoute(busId).getEndTime();
+    public Passenger getPassenger() {
+        return passenger;
     }
 
     @Override
@@ -82,8 +55,8 @@ class Ticket {
         return "Ticket{" +
                 "ticketId=" + ticketId +
                 ", transactionTimestamp=" + transactionTimestamp +
-                ", busMap=" + busMap +
-                ", passengerMap=" + passengerMap +
+                ", busId=" + bus.getBusId() +
+                ", passenger=" + passenger.getName() +
                 ", price=" + price +
                 '}';
     }
