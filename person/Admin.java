@@ -5,18 +5,33 @@ import java.util.regex.Pattern;
 public class Admin {
     private Scanner scanner = new Scanner(System.in);
 
+    private static int adminCounter = 1;
+
+    private int adminId;
     private String username;
     private String password;
     private String phoneNumber;
 
     static HashMap<String, Admin> allAdmin = new HashMap<>();
+    // Here we used Hashmap instead of LL because even though HM are faster O(1)
+    // they take a lot of storage which is why we used on admin not costumer or
+    // passenger
 
     public Admin() {
 
+        this.adminId = adminCounter++;
         setName();
         setPassword();
         setPhoneNumber();
         allAdmin.put(username, this);
+    }
+
+    public static int getAdminCounter() {
+        return adminCounter;
+    }
+
+    public int getAdminId() {
+        return adminId;
     }
 
     public String getName() {
