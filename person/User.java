@@ -3,20 +3,23 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 abstract class User {
+    static int userId = 1;
     private String name;
+    private String email;
+    private String password;
     private String phoneNumber;
     private String dateOfBirth;
     private DiscountPass dp;
-
     private HashMap<Integer, Ticket> ticketBookedHistory = new HashMap<>();;
-
     public User() {
+        userId++;
         System.out.println("sign up:");
         setName(name);
         setPhoneNumber(phoneNumber);
         setDateOfBirth(dateOfBirth);
         setDiscountPass();
-
+        setEmail();
+        setPassword();
     }
 
     // Getters
@@ -26,6 +29,50 @@ abstract class User {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public DiscountPass getDp() {
+        return dp;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    
+
+    public static int getUserId() {
+        return userId;
+    }
+
+    public void setPassword() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Enter password (minimum 8 characters, must include letters and digits): ");
+            String input = scanner.nextLine();
+            if (isValidPassword(input)) {
+                this.password = input;
+                break;
+            }
+            System.out.println("Invalid password. Please re-enter the password.");
+        }
+    }
+    public String getPassword(){
+        return this.password;
+    }
+
+   
+
+    public HashMap<Integer, Ticket> getTicketBookedHistory() {
+        return ticketBookedHistory;
+    }
+
+    public void setTicketBookedHistory(HashMap<Integer, Ticket> ticketBookedHistory) {
+        this.ticketBookedHistory = ticketBookedHistory;
     }
 
     public HashMap<Integer, Ticket> getticketBookedHistory() {
@@ -67,6 +114,18 @@ abstract class User {
         }
         this.dateOfBirth = dateOfBirth;
     }
+    public void setEmail() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Enter email: ");
+            String input = scanner.nextLine();
+            if (isValidEmail(input)) {
+                this.email = input;
+                break;
+            }
+            System.out.println("Invalid email. Please re-enter the email.");
+        }
+    }
 
     // Validation methods
     private boolean isValidPhoneNumber(String phoneNumber) {
@@ -77,6 +136,31 @@ abstract class User {
     private boolean isValidDateOfBirth(String dateOfBirth) {
         // Simple regex for date of birth validation (format: YYYY-MM-DD)
         return Pattern.matches("^(19|20)\\d\\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$", dateOfBirth);
+    }
+    public boolean isValidEmail(String email) {
+        // Simple validation to check the email format contains "@" and "."
+        int atPosition = email.indexOf('@');
+        int dotPosition = email.lastIndexOf('.');
+        return atPosition > 0 && dotPosition > atPosition;
+    }
+    private boolean isValidPassword(String password) {
+        // Password must be at least 8 characters long and contain both letters and digits
+        if (password.length() < 8) {
+            return false;
+        }
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) {
+                hasLetter = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            }
+            if (hasLetter && hasDigit) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Methods to add tickets and discount passes
@@ -89,7 +173,7 @@ abstract class User {
             System.out.println("Available Discount Passes:");
             int i = 1;
             for (DiscountPass dp : DiscountPass.allDP) {
-                System.out.println(i + ". " + dp);
+                System.out.println(i + ". " + dp.getPassType());
                 i++;
             }
             System.out.println("0. Set DiscountPass to null");
@@ -119,4 +203,6 @@ abstract class User {
             }
         
     }
+
+    
 }
