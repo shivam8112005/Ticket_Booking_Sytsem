@@ -1,47 +1,80 @@
 import java.util.LinkedList;
+import java.util.Scanner;
 
 class DiscountPass {
-    public static LinkedList<DiscountPass> allDP=new LinkedList<>(); 
-    private int passId;
-    private String passType;
-    private double discountPercentage;
+    private Scanner scanner = new Scanner(System.in);
+    public static LinkedList<DiscountPass> allDiscountPass = new LinkedList<>();
+    private int passIdCounter = 1;
 
-    public DiscountPass(int passId, String passType, double discountPercentage) {
-        this.passId = passId;
-        this.passType = passType;
+    private int passId;
+    private String passName;
+    private float discountPercentage;
+
+    public DiscountPass() {
+        this.passId = passIdCounter++;
+        setPassName();
         this.discountPercentage = discountPercentage;
-        allDP.add(this);
+        allDiscountPass.add(this);
+    }
+
+    public void setPassName() {
+        String name;
+
+        while (true) {
+            System.out.print("Enter name (32 characters or less): ");
+            name = scanner.nextLine();
+
+            if (name.length() <= 32) {
+                break;
+            } else {
+                System.out.println("Name must be 32 characters or less. Please re-enter the name.");
+            }
+        }
+
+        this.passName = name;
+    }
+
+    public void setDiscountPercentage() {
+        while (true) {
+            System.out.print("Enter discount percentage (0-100): ");
+            float discountPercentage = scanner.nextFloat();
+            scanner.nextLine(); // Clear the buffer
+
+            if (discountPercentage >= 0 && discountPercentage <= 100) {
+                this.discountPercentage = discountPercentage;
+                System.out.println("Discount percentage set successfully!");
+                break;
+            } else {
+                System.out.println("Invalid discount percentage. It must be between 0 and 100.");
+            }
+        }
     }
 
     public int getPassId() {
         return passId;
     }
 
-    public void setPassId(int passId) {
-        this.passId = passId;
+    public static LinkedList<DiscountPass> getAllDiscountPass() {
+        return allDiscountPass;
     }
 
-    public String getPassType() {
-        return passType;
+    public int getPassIdCounter() {
+        return passIdCounter;
     }
 
-    public void setPassType(String passType) {
-        this.passType = passType;
+    public String getPassName() {
+        return passName;
     }
 
     public double getDiscountPercentage() {
         return discountPercentage;
     }
 
-    public void setDiscountPercentage(double discountPercentage) {
-        this.discountPercentage = discountPercentage;
-    }
-
     @Override
     public String toString() {
         return "DiscountPass{" +
                 "passId=" + passId +
-                ", passType='" + passType + '\'' +
+                ", passType='" + passName + '\'' +
                 ", discountPercentage=" + discountPercentage +
                 '}';
     }
