@@ -11,7 +11,7 @@ class Bus {
     private String numberPlate;
     private Trip route;
 
-    private Seat[][] busSeats;// 2d array of seats aka rectangle
+    public Seat[][] busSeats;// 2d array of seats aka rectangle
 
     public Bus() {
         this.busId = busCounter++;
@@ -105,6 +105,17 @@ class Bus {
             seat.setOccupied(true);
             seat.setPassenger(passenger);
             return true;
+        }
+    }
+
+    public static void printAllBus() {
+        for (Bus bus : Bus.getAllBus()) {
+            System.out.println("Bus ID: " + bus.getBusId());
+            System.out.println("Number Plate: " + bus.getNumberPlate());
+            System.out.println("Route: " + bus.getRoute().getName());
+            System.out.println(
+                    "Seats: " + bus.busSeats.length + " rows, " + bus.busSeats[0].length + " columns");
+            System.out.println();
         }
     }
 
