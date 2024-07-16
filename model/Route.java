@@ -67,15 +67,11 @@ class Route {
         }
     }
 
-    public void setRouteId(int routeId) {
-        this.routeId = routeId;
-    }
-
     public void setStartLocation(String startLocation) {
         this.startLocation = setLocation("Enter start location (max 64 characters): ");
     }
 
-    public LinkedList<Route> getAllRoute() {
+    public static LinkedList<Route> getAllRoute() {
         return allRoute;
     }
 
