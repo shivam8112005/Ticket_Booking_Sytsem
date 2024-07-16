@@ -1,32 +1,29 @@
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-class Route {
-    // java.sql.Time routeTime = resultSet.getTime("route_time");
+class Trip {
+    // java.sql.Time tripTime = resultSet.getTime("trip_time");
     private Scanner scanner = new Scanner(System.in);
-    private static LinkedList<Route> allRoute = new LinkedList<>();
-    static int routeCounter = 1;
-    private int routeId;
+    private static LinkedList<Trip> allTrip = new LinkedList<>();
+    static int tripCounter = 1;
+    private int tripId;
     private String startLocation;
-    private String startTime;
+    private String startTime; //Time means time + date as in "13:00 04-January-2024"
     private String endLocation;
     private String endTime;
-    private boolean[] daysOfWeek; // true if the route runs on that day, false otherwise
 
-    public Route() {
-        this.routeId = routeCounter++;
+    public Trip() {
+        this.tripId = tripCounter++;
         this.startLocation = setLocation("Enter start location (max 64 characters): ");
         this.startTime = setTime("Enter start time: ");
         this.endLocation = setLocation("Enter end location (max 64 characters): ");
         this.endTime = setTime("Enter end time: ");
-        setDaysOfWeek();
-        allRoute.add(this);
+        allTrip.add(this);
     }
 
-    public int getRouteId() {
-        return this.routeId;
+    public int getTripId() {
+        return this.tripId;
     }
 
     public String getStartLocation() {
@@ -46,37 +43,16 @@ class Route {
         }
     }
 
-    public void setDaysOfWeek() {
-        this.daysOfWeek = new boolean[7];
-        String[] days = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-
-        for (int i = 0; i < days.length; i++) {
-            while (true) {
-                System.out.print("Does the route run on " + days[i] + "? (yes/no): ");
-                String input = scanner.nextLine().trim().toLowerCase();
-                if (input.equals("yes")) {
-                    this.daysOfWeek[i] = true;
-                    break;
-                } else if (input.equals("no")) {
-                    this.daysOfWeek[i] = false;
-                    break;
-                } else {
-                    System.out.println("Invalid input. Please enter 'yes' or 'no'.");
-                }
-            }
-        }
-    }
-
     public void setStartLocation(String startLocation) {
         this.startLocation = setLocation("Enter start location (max 64 characters): ");
     }
 
-    public static LinkedList<Route> getAllRoute() {
-        return allRoute;
+    public static LinkedList<Trip> getAllTrip() {
+        return allTrip;
     }
 
-    public int getRouteCounter() {
-        return routeCounter;
+    public int getTripCounter() {
+        return tripCounter;
     }
 
     public String setTime(String prompt) {
@@ -117,23 +93,18 @@ class Route {
         this.endTime = setTime("Enter end time: ");
     }
 
-    public boolean[] getDaysOfWeek() {
-        return this.daysOfWeek;
-    }
-
     public String getName() {
         return this.startLocation + " to " + this.endLocation;
     }
 
     @Override
     public String toString() {
-        return "Route{" +
-                "routeId=" + routeId +
+        return "trip{" +
+                "tripId=" + tripId +
                 ", startLocation='" + startLocation + '\'' +
                 ", startTime='" + startTime + '\'' +
                 ", endLocation='" + endLocation + '\'' +
                 ", endTime='" + endTime + '\'' +
-                ", daysOfWeek=" + Arrays.toString(daysOfWeek) +
                 '}';
     }
 }
