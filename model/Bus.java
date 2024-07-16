@@ -9,7 +9,7 @@ class Bus {
 
     private int busId;
     private String numberPlate;
-    private Route route;
+    private Trip route;
 
     public Bus() {
         this.busId = busCounter++;
@@ -43,8 +43,8 @@ class Bus {
     public void setRoute() {
         while (true) {
             System.out.println("Available routes:");
-            for (Route route : Route.getAllRoute()) {
-                System.out.println(route.getRouteId() + ": " + route.getName());
+            for (Trip route : Trip.getAllTrip()) {
+                System.out.println(route.getTripId() + ": " + route.getName());
             }
             System.out.println("0: Add new route");
 
@@ -53,12 +53,12 @@ class Bus {
             scanner.nextLine();
 
             if (choice == 0) {
-                this.route = new Route();
+                this.route = new Trip();
                 break;
             } else {
                 boolean found = false;
-                for (Route route : Route.getAllRoute()) {
-                    if (route.getRouteId() == choice) {
+                for (Trip route : Trip.getAllTrip()) {
+                    if (route.getTripId() == choice) {
                         this.route = route;
                         found = true;
                         break;
@@ -81,7 +81,7 @@ class Bus {
         return busCounter;
     }
 
-    public Route getRoute() {
+    public Trip getRoute() {
         return route;
     }
 
