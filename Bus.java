@@ -10,15 +10,12 @@ class Bus {
         this.numberPlate = numberPlate;
         this.busRoutes.put(this, route);
     }
-
     public void addRoute(Route route) {
         this.busRoutes.put(this, route);
     }
-
     public Route getRoute(int routeId) {
         return busRoutes.get(this);
     }
-
     public int getBusId() {
         return this.busId;
     }
