@@ -11,10 +11,13 @@ class Bus {
     private String numberPlate;
     private Trip route;
 
+    private Seat[][] busSeats;// 2d array of seats aka rectangle
+
     public Bus() {
         this.busId = busCounter++;
         setNumberPlate();
         setRoute();
+        setBusSeats();
         allBus.add(this);
     }
 
@@ -70,6 +73,38 @@ class Bus {
                     System.out.println("Invalid route ID. Please try again.");
                 }
             }
+        }
+    }
+
+    public void setBusSeats() {
+        // Initializes bus seats
+        System.out.print("Enter the number of rows: ");
+        int rows = scanner.nextInt();
+        System.out.print("Enter the number of columns: ");
+        int columns = scanner.nextInt();
+        scanner.nextLine();
+        busSeats = new Seat[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                busSeats[i][j] = new Seat((i * columns) + j + 1, this);
+            }
+        }
+    }
+
+    public boolean bookSeat(int row, int column, Passenger passenger) {
+        if (row < 0 || row >= busSeats.length || column < 0 || column >= busSeats[0].length) {
+            System.out.println("Invalid seat position.");
+            return false;
+        }
+
+        Seat seat = busSeats[row][column];
+        if (seat.isOccupied()) {
+            System.out.println("Seat already occupied.");
+            return false;
+        } else {
+            seat.setOccupied(true);
+            seat.setPassenger(passenger);
+            return true;
         }
     }
 
