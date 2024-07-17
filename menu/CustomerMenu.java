@@ -208,7 +208,8 @@ public class CustomerMenu extends Customer{
         for(Passenger l:ul.usersPassenger){
             System.out.println(p +". "+l.toString());
             p++;
-        }System.out.println(p+". New Passenger +");
+        }//logic to add multiple passengers at the same time
+        System.out.println(p+". New Passenger +");
         int choice=1;
         while(true){
             choice=sc.nextInt();
