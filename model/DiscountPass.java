@@ -79,6 +79,13 @@ class DiscountPass {
         return discountPercentage;
     }
 
+    public Scanner getScanner() {
+        return scanner;
+    }
+    public String getPasssName(){
+        return this.passName;
+    }
+
     @Override
     public String toString() {
         return "DiscountPass{" +

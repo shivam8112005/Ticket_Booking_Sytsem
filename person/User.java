@@ -1,9 +1,10 @@
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 abstract class User {
-    static int userId = 1;
+    static int userId = 0;
     private String name;
     private String email;
     private String password;
@@ -11,17 +12,27 @@ abstract class User {
     private String dateOfBirth;
     private DiscountPass dp;
     private HashMap<Integer, Ticket> ticketBookedHistory = new HashMap<>();;
-    public User() {
-        userId++;
+    static HashMap<String,User> users=new HashMap<>();
+     public User(int a){
+        
+     }
+    public User(String email) {
         System.out.println("sign up:");
-        setName(name);
-        setPhoneNumber(phoneNumber);
-        setDateOfBirth(dateOfBirth);
+        setName();
+        setPhoneNumber();
+        setDateOfBirth();
         setDiscountPass();
-        setEmail();
+        setEmail(email);
         setPassword();
+        users.put(this.email,this);
+        userId++;
     }
 
+    @Override
+    public String toString() {
+        return "User [name=" + name + ", email=" + email + ", phoneNumber=" + phoneNumber + ", dateOfBirth="
+                + dateOfBirth + ", dp=" + dp + ", userId="+userId+ "]";
+    }
     // Getters
     public String getName() {
         return name;
@@ -88,31 +99,37 @@ abstract class User {
     }
 
     // Setters with validation
-    public void setName(String name) {
+    public void setName() {
+        System.out.println("Enter Name: ");
+        Scanner scanner = new Scanner(System.in);
+        name = scanner.nextLine();
         while (name.length() > 32) {
             System.out.println("Name must be 32 characters or less. Please re-enter the name:");
-            Scanner scanner = new Scanner(System.in);
             name = scanner.nextLine();
         }
-        this.name = name;
+        
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhoneNumber() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter Phone no.: ");
+        phoneNumber = scanner.nextLine();
         while (!isValidPhoneNumber(phoneNumber)) {
             System.out.println("Invalid phone number. Please re-enter the phone number:");
-            Scanner scanner = new Scanner(System.in);
             phoneNumber = scanner.nextLine();
         }
-        this.phoneNumber = phoneNumber;
+       
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth() {
+        System.out.println("Enter DOB : ");
+        Scanner scanner = new Scanner(System.in);
+            dateOfBirth = scanner.nextLine();
         while (!isValidDateOfBirth(dateOfBirth)) {
             System.out.println("Invalid date of birth. Please re-enter the date of birth (format: YYYY-MM-DD):");
-            Scanner scanner = new Scanner(System.in);
             dateOfBirth = scanner.nextLine();
         }
-        this.dateOfBirth = dateOfBirth;
+       
     }
     public void setEmail() {
         Scanner scanner = new Scanner(System.in);
@@ -172,8 +189,8 @@ abstract class User {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Available Discount Passes:");
             int i = 1;
-            for (DiscountPass dp : DiscountPass.allDP) {
-                System.out.println(i + ". " + dp.getPassType());
+            for (DiscountPass dp : DiscountPass.allDiscountPass) {
+                System.out.println(i + ". " + dp.getPassName());
                 i++;
             }
             System.out.println("0. Set DiscountPass to null");
@@ -183,7 +200,7 @@ abstract class User {
             while (true) {
                 try {
                     choice = Integer.parseInt(scanner.nextLine());
-                    if (choice < 0 || choice > DiscountPass.allDP.size()) {
+                    if (choice < 0 || choice > DiscountPass.allDiscountPass.size()) {
                         System.out.print("Invalid choice. Please select a valid number: ");
                     } else {
                         break;
@@ -198,7 +215,7 @@ abstract class User {
                     this.dp = null;
                     break;
                 default:
-                    this.dp = DiscountPass.allDP.get(choice - 1);
+                    this.dp = DiscountPass.allDiscountPass.get(choice - 1);
                     break;
             }
         
