@@ -6,14 +6,13 @@ import java.util.Scanner;
 class Trip {
     // java.sql.Time tripTime = resultSet.getTime("trip_time");
     private static Scanner scanner = new Scanner(System.in);
-    private static LinkedList<Trip> allTrip = new LinkedList<>();
+     static LinkedList<Trip> allTrip = new LinkedList<>();
     static int tripCounter = 1;
     private int tripId;
     private String startLocation;
     private LocalDateTime startTime;
     private String endLocation;
     private LocalDateTime endTime;
-
     public Trip() {
         this.tripId = tripCounter++;
         this.startLocation = setLocation("Enter start location (max 64 characters): ");

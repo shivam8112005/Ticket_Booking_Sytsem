@@ -218,10 +218,9 @@ public class AdminMenu {
                     }
                     break;
                 case 4:
-                    new Trip();
+                    Trip.allTrip.add(new Trip());
                     break;
                 case 5:
-
                     System.out.print("Enter start location: ");
                     String startLocation = scanner.nextLine();
 
@@ -288,7 +287,10 @@ public class AdminMenu {
                     Bus.printAllBus();
                     break;
                 case 2:
-                    new Bus();
+                System.out.println("Enter Trip Details for Bus: ");
+                Trip t=new Trip();
+                    new Bus(t);
+                    Trip.allTrip.add(t);
                     break;
                 case 3:
                     Bus.printAllBus();
@@ -296,7 +298,7 @@ public class AdminMenu {
                     int deleteId = scanner.nextInt();
                     scanner.nextLine();
                     Bus busToRemove = null;
-                    for (Bus bus : Bus.getAllBus()) {
+                    for (Bus bus : Bus.getAllBus().keySet()) {
                         if (bus.getBusId() == deleteId) {
                             busToRemove = bus;
                             break;
@@ -314,7 +316,7 @@ public class AdminMenu {
                     System.out.print("Enter the Bus ID to alter: ");
                     int alterId = scanner.nextInt();
                     scanner.nextLine();
-                    for (Bus bus : Bus.getAllBus()) {
+                    for (Bus bus : Bus.getAllBus().keySet()) {
                         if (bus.getBusId() == alterId) {
                             boolean alterExit = false;
                             while (!alterExit) {

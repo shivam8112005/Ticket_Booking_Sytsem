@@ -1,24 +1,27 @@
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 class Bus {
     private Scanner scanner = new Scanner(System.in);
-    private static LinkedList<Bus> allBus = new LinkedList<>();
+    private static HashMap<Bus,Trip> allBus = new HashMap<>();
+    //  HashMap<Bus,Ticket> busTicketPrices = new HashMap<>();
     static int busCounter = 1;
-
+    double price;
     private int busId;
     private String numberPlate;
     private Trip route;
-
     public Seat[][] busSeats;// 2d array of seats aka rectangle
+    public Bus(int a){
 
-    public Bus() {
+    }
+    public Bus(Trip trip) {
         this.busId = busCounter++;
         setNumberPlate();
         setRoute();
         setBusSeats();
-        allBus.add(this);
+        allBus.put(this,trip);
     }
 
     public int getBusId() {
@@ -90,13 +93,12 @@ class Bus {
             }
         }
     }
-
     public boolean bookSeat(int row, int column, Passenger passenger) {
         if (row < 0 || row >= busSeats.length || column < 0 || column >= busSeats[0].length) {
             System.out.println("Invalid seat position.");
             return false;
         }
-
+        
         Seat seat = busSeats[row][column];
         if (seat.isOccupied()) {
             System.out.println("Seat already occupied.");
@@ -109,7 +111,7 @@ class Bus {
     }
 
     public static void printAllBus() {
-        for (Bus bus : Bus.getAllBus()) {
+        for (Bus bus : Bus.getAllBus().keySet()) {
             System.out.println("Bus ID: " + bus.getBusId());
             System.out.println("Number Plate: " + bus.getNumberPlate());
             System.out.println("Route: " + bus.getRoute().getName());
@@ -119,7 +121,7 @@ class Bus {
         }
     }
 
-    public static LinkedList<Bus> getAllBus() {
+    public static HashMap<Bus,Trip> getAllBus() {
         return allBus;
     }
 
@@ -130,7 +132,9 @@ class Bus {
     public Trip getRoute() {
         return route;
     }
+    public void bookTicket(){
 
+    }
     @Override
     public String toString() {
         return "Bus{" +
