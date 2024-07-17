@@ -11,7 +11,8 @@ abstract class User {
     private String phoneNumber;
     private String dateOfBirth;
     private DiscountPass dp;
-    private HashMap<Integer, Ticket> ticketBookedHistory = new HashMap<>();;
+    private HashMap<Integer, Ticket> ticketBookedHistory = new HashMap<>();
+    LinkedList<Passenger> usersPassenger=new LinkedList<>();
     static HashMap<String,User> users=new HashMap<>();
      public User(int a){
         

@@ -104,8 +104,114 @@ public class CustomerMenu extends Customer{
        }
     }
     private void customermenu() {
-        
+        System.out.println("1. Book Ticket");
+        System.out.println("2. View Buses");
+        System.out.println("3. Upcoming Journeys");
+        System.out.println("4. View Booked Ticket History");
+        System.out.println("5. Profile");
+        System.out.println("6. Return");
+        int c=sc.nextInt();
+        switch (c) {
+            case 1:
+            bookTicket();
+                break;
+            case 2:
+                
+                break;
+            case 3:
+                
+                break;  
+            case 4:
+            
+                break;
+            case 5:
+            
+                break;
+            case 6:
+              
+                break;
+        }
     }
-    
-    
+    public synchronized void  bookTicket(){
+        ArrayList<Bus> avlbus=new ArrayList<>();
+        int i=1;
+        boolean b=true;
+       System.out.println("Enter startLocation: ");
+       String start=sc.nextLine();
+       System.out.println("Enter EndLocation: ");
+       String end=sc.nextLine();
+        for (Bus bus : Bus.getAllBus().keySet()) {
+           if(Bus.getAllBus().get(bus).getStartLocation().equalsIgnoreCase(start) && Bus.getAllBus().get(bus)
+           .getEndLocation().equalsIgnoreCase(end)){
+            b=false;
+            System.out.println(i++ +". Bus Details: "+bus.toString());
+            System.out.println("Trip Details: "+Bus.getAllBus().get(bus).toString());
+            System.out.println("--------------------------------------------");
+            avlbus.add(bus);
+           }
+        }if(b){
+            System.out.println("no buses availble!");
+            return;
+        }
+        int c=1;
+       while(true){
+        c=sc.nextInt();
+        if(c>=1 && c<=avlbus.size()){
+            break;
+        }else{
+            System.out.println("please enter valid input!");
+        }
+       }
+        Bus selectedBus=avlbus.get(c-1);
+        System.out.println(selectedBus.toString());
+        System.out.println("Ticket Price: "+selectedBus.price);
+        System.out.println("Book Ticket ? (y/n): ");
+        String ch=sc.next();
+        if(ch.equalsIgnoreCase("n")){
+            return;
+        }
+        System.out.println("Previous Passengers:");
+        int p=2;
+        for(Passenger l:ul.usersPassenger){
+            System.out.println(p++ +". "+l.toString());
+        }System.out.println(i+". New Passenger +");
+        int choice=1;
+        while(true){
+            choice=sc.nextInt();
+         if(choice>=1 && choice<=ul.usersPassenger.size()){
+             break;
+         }else{
+             System.out.println("please enter valid input!");
+         }
+        }
+        if(choice==ul.usersPassenger.size()){
+            Passenger passenger=new Passenger();
+            ul.usersPassenger.add(passenger);
+            System.out.println("Enter Row: ");
+            int row=sc.nextInt();
+            System.out.println("Enter Column: ");
+            int col=sc.nextInt();
+           while(! selectedBus.bookSeat(row,col,passenger)){
+            System.out.println("Seat not available!");
+            System.out.println("Enter Row: ");
+             row=sc.nextInt();
+            System.out.println("Enter Column: ");
+             col=sc.nextInt();
+           }
+            Ticket t=new Ticket(selectedBus.price, selectedBus, passenger);
+            return;
+        }
+        System.out.println("Enter Row: ");
+        int row=sc.nextInt();
+        System.out.println("Enter Column: ");
+        int col=sc.nextInt();
+       while(! selectedBus.bookSeat(row,col, ul.usersPassenger.get(choice-1))){
+        System.out.println("Seat not available!");
+        System.out.println("Enter Row: ");
+         row=sc.nextInt();
+        System.out.println("Enter Column: ");
+         col=sc.nextInt();
+       }
+        Ticket t=new Ticket(selectedBus.price, selectedBus, ul.usersPassenger.get(choice-1));
+    }
 }
