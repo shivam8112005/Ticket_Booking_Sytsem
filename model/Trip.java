@@ -1,24 +1,34 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 class Trip {
     // java.sql.Time tripTime = resultSet.getTime("trip_time");
-    private Scanner scanner = new Scanner(System.in);
+    private static Scanner scanner = new Scanner(System.in);
     private static LinkedList<Trip> allTrip = new LinkedList<>();
     static int tripCounter = 1;
     private int tripId;
     private String startLocation;
-    private String startTime; //Time means time + date as in "13:00 04-January-2024"
+    private LocalDateTime startTime;
     private String endLocation;
-    private String endTime;
+    private LocalDateTime endTime;
 
     public Trip() {
         this.tripId = tripCounter++;
         this.startLocation = setLocation("Enter start location (max 64 characters): ");
-        this.startTime = setTime("Enter start time: ");
+        this.startTime = setTime("Enter start time (format: yyyy-MM-dd HH:mm): ");
         this.endLocation = setLocation("Enter end location (max 64 characters): ");
-        this.endTime = setTime("Enter end time: ");
+        this.endTime = setTime("Enter end time (format: yyyy-MM-dd HH:mm): ");
+        allTrip.add(this);
+    }
+
+    public Trip(String startLocation, LocalDateTime startTime, String endLocation, LocalDateTime endTime) {
+        this.tripId = tripCounter++;
+        this.startLocation = startLocation;
+        this.startTime = startTime;
+        this.endLocation = endLocation;
+        this.endTime = endTime;
         allTrip.add(this);
     }
 
@@ -43,7 +53,7 @@ class Trip {
         }
     }
 
-    public void setStartLocation(String startLocation) {
+    public void setStartLocation() {
         this.startLocation = setLocation("Enter start location (max 64 characters): ");
     }
 
@@ -51,29 +61,32 @@ class Trip {
         return allTrip;
     }
 
-    public int getTripCounter() {
-        return tripCounter;
-    }
-
-    public String setTime(String prompt) {
-        String timePattern = "^([01]?\\d|2[0-3]):[0-5]\\d$"; // Regex pattern for HH:MM format
-
+    public static LocalDateTime setTime(String prompt) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); // Pattern for date and time
         while (true) {
             System.out.print(prompt);
             String input = scanner.nextLine();
-            if (Pattern.matches(timePattern, input)) {
-                return input;
-            } else {
-                System.out.println("Invalid time format. Please enter time in HH:MM format.");
+            try {
+                return LocalDateTime.parse(input, formatter); // Parse input to LocalDateTime
+            } catch (Exception e) {
+                System.out.println("Invalid date/time format. Please enter in 'yyyy-MM-dd HH:mm' format.");
             }
         }
     }
 
-    public String getStartTime() {
+    public boolean isPending() {
+        return this.endTime.isAfter(LocalDateTime.now()); // Check if end time is after current time
+    }
+
+    public int getTripCounter() {
+        return tripCounter;
+    }
+
+    public LocalDateTime getStartTime() {
         return this.startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime() {
         this.startTime = setTime("Enter start time: ");
     }
 
@@ -81,20 +94,30 @@ class Trip {
         return this.endLocation;
     }
 
-    public void setEndLocation(String endLocation) {
+    public void setEndLocation() {
         this.endLocation = setLocation("Enter end location (max 64 characters): ");
     }
 
-    public String getEndTime() {
+    public LocalDateTime getEndTime() {
         return this.endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime() {
         this.endTime = setTime("Enter end time: ");
     }
 
     public String getName() {
         return this.startLocation + " to " + this.endLocation;
+    }
+
+    public static void printAllTrip() {
+        for (Trip trip : getAllTrip()) {
+            System.out.println("Trip ID: " + trip.getTripId() +
+                    ", Start Location: " + trip.getStartLocation() +
+                    ", Start Time: " + trip.getStartTime() +
+                    ", End Location: " + trip.getEndLocation() +
+                    ", End Time: " + trip.getEndTime());
+        }
     }
 
     @Override
