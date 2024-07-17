@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AdminMenu {
+    public static void main(String[] args) {
+       
+    }
     private Scanner scanner = new Scanner(System.in);
     private Admin currentAdmin;
 

@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -11,14 +12,14 @@ abstract class User {
     private String phoneNumber;
     private String dateOfBirth;
     private DiscountPass dp;
-    private HashMap<Integer, Ticket> ticketBookedHistory = new HashMap<>();
+     ArrayList<Ticket> ticketBookedHistory = new ArrayList<>();
     LinkedList<Passenger> usersPassenger=new LinkedList<>();
     static HashMap<String,User> users=new HashMap<>();
      public User(int a){
         
      }
     public User(String email) {
-        System.out.println("sign up:");
+      
         setName();
         setPhoneNumber();
         setDateOfBirth();
