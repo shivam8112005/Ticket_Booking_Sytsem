@@ -50,6 +50,15 @@ class DiscountPass {
         }
     }
 
+    public static void printAllDiscountPass() {
+        for (DiscountPass pass : DiscountPass.getAllDiscountPass()) {
+            System.out.println("Pass ID: " + pass.getPassId());
+            System.out.println("Pass Name: " + pass.getPassName());
+            System.out.println("Discount Percentage: " + pass.getDiscountPercentage() + "%");
+            System.out.println();
+        }
+    }
+
     public int getPassId() {
         return passId;
     }
