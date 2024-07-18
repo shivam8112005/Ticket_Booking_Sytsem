@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-abstract class User {
+public abstract class User {
     static int userId = 0;
     private String name;
     private String email;
@@ -12,8 +12,8 @@ abstract class User {
     private String phoneNumber;
     private String dateOfBirth;
     private DiscountPass dp;
-     ArrayList<Ticket> ticketBookedHistory = new ArrayList<>();
-    LinkedList<Passenger> usersPassenger=new LinkedList<>();
+    public ArrayList<Ticket> ticketBookedHistory = new ArrayList<>();
+    public LinkedList<Passenger> usersPassenger=new LinkedList<>();
     static HashMap<String,User> users=new HashMap<>();
      public User(int a){
         
@@ -80,15 +80,13 @@ abstract class User {
 
    
 
-    public HashMap<Integer, Ticket> getTicketBookedHistory() {
-        return ticketBookedHistory;
-    }
+   
 
-    public void setTicketBookedHistory(HashMap<Integer, Ticket> ticketBookedHistory) {
+    public void setTicketBookedHistory(ArrayList<Ticket> ticketBookedHistory) {
         this.ticketBookedHistory = ticketBookedHistory;
     }
 
-    public HashMap<Integer, Ticket> getticketBookedHistory() {
+    public ArrayList<Ticket> getTicketBookedHistory() {
         return ticketBookedHistory;
     }
 
@@ -183,9 +181,9 @@ abstract class User {
     }
 
     // Methods to add tickets and discount passes
-    public void addTicket(Ticket ticket) {
-        this.ticketBookedHistory.put(ticket.getTicketId(), ticket);
-    }
+    // public void addTicket(Ticket ticket) {
+    //     this.ticketBookedHistory.put(ticket.getTicketId(), ticket);
+    // }
     public void setDiscountPass(){
       
             Scanner scanner = new Scanner(System.in);
