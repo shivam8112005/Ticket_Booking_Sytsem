@@ -17,6 +17,7 @@ public class Bus {
 
     }
     public Bus(Trip trip) {
+        System.out.println("Enter Bus Details: ");
         this.busId = busCounter++;
         setNumberPlate();
         setRoute();
