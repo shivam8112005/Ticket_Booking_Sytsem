@@ -1,7 +1,7 @@
 import java.util.LinkedList;
 import java.util.Scanner;
 
-class Ticket extends Bus{
+public class Ticket extends Bus{
     private static Scanner scanner = new Scanner(System.in);
     private static LinkedList<Ticket> allTickets = new LinkedList<>();
     private static int ticketCounter = 1;

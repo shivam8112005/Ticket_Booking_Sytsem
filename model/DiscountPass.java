@@ -1,7 +1,7 @@
 import java.util.LinkedList;
 import java.util.Scanner;
 
-class DiscountPass {
+public class DiscountPass {
     private Scanner scanner = new Scanner(System.in);
     public static LinkedList<DiscountPass> allDiscountPass = new LinkedList<>();
     private int passIdCounter = 1;

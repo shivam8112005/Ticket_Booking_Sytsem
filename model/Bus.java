@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-class Bus {
+public class Bus {
     private Scanner scanner = new Scanner(System.in);
     private static HashMap<Bus,Trip> allBus = new HashMap<>();
     //  HashMap<Bus,Ticket> busTicketPrices = new HashMap<>();

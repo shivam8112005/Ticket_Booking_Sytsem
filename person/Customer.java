@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 
-class Customer extends User {
+public class Customer extends User {
     private String password;
      static int customerId = 1; // Static counter for unique IDs
     private LinkedList<Ticket> boookedTicket=new LinkedList<>();

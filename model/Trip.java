@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-class Trip {
+public class Trip {
     // java.sql.Time tripTime = resultSet.getTime("trip_time");
     private static Scanner scanner = new Scanner(System.in);
      static LinkedList<Trip> allTrip = new LinkedList<>();
