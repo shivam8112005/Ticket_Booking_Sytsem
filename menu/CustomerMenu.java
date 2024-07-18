@@ -109,6 +109,7 @@ public class CustomerMenu extends Customer{
         String ch=sc.next();
         if(ch.equalsIgnoreCase("y")){
             this.ul=new Customer(input);
+            customermenu();
         }
         }
        }
