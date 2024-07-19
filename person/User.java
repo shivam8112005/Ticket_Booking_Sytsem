@@ -12,9 +12,9 @@ abstract class User {
     private String phoneNumber;
     private String dateOfBirth;
     private DiscountPass dp;
-     ArrayList<Ticket> ticketBookedHistory = new ArrayList<>();
-    LinkedList<Passenger> usersPassenger=new LinkedList<>();
-    static HashMap<String,User> users=new HashMap<>();
+     public ArrayList<Ticket> ticketBookedHistory = new ArrayList<>();
+    public LinkedList<Passenger> usersPassenger=new LinkedList<>();
+    public static HashMap<String,User> users=new HashMap<>();
      public User(int a){
         
      }

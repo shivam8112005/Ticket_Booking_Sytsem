@@ -23,7 +23,7 @@ public class CustomerMenu extends Customer{
         boolean exit = true;
         
         while (exit) {
-            System.out.println(users);
+            System.out.println(User.users);
        
          System.out.println();
             System.out.println("User Menu:");

@@ -55,8 +55,8 @@ public class AdminMenu {
     }
 
     public void adminMenu() {
-
-        while (true) {
+        boolean exit=true;
+        while (exit) {
             System.out.println("Admin Options:");
             System.out.println("1. Discount Pass Options");
             System.out.println("2. Trip Options");
@@ -64,7 +64,6 @@ public class AdminMenu {
             System.out.println("4. Profile");
             System.out.println("5. Logout");
             System.out.println("6. App Statistics");
-
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -82,6 +81,7 @@ public class AdminMenu {
                     break;
                 case 5:
                     System.out.println("Logged out successfully.");
+                    exit=false;
                     return;
                 case 6:
                     break;
