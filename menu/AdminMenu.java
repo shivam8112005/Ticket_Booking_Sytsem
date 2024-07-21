@@ -128,6 +128,7 @@ public class AdminMenu {
                     }
                     if (passToRemove != null) {
                         DiscountPass.getAllDiscountPass().remove(passToRemove);
+                        DatabaseUtil.deleteDiscountPass(passToRemove.getPassId());
                         System.out.println("Discount Pass removed successfully.");
                     } else {
                         System.out.println("Pass ID not found.");
@@ -154,7 +155,10 @@ public class AdminMenu {
                                 switch (alterChoice) {
                                     case 1:
                                         try {
-                                            pass.setPassName(pass);
+                                           boolean b= pass.setPassName(pass);
+                                           if(b){
+                                            DatabaseUtil.alterDiscountPassName(pass.getPassName(), alterId);
+                                           }
                                         } catch (Exception e) {
                                             // TODO Auto-generated catch block
                                             e.printStackTrace();
@@ -162,6 +166,7 @@ public class AdminMenu {
                                         break;
                                     case 2:
                                         pass.setDiscountPercentage();
+                                        DatabaseUtil.alterDiscountPasspercent(pass.getDiscountPercentage(), alterId);
                                         break;
                                     case 3:
                                         alterExit = true;
