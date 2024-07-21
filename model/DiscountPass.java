@@ -1,3 +1,5 @@
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -11,15 +13,42 @@ public class DiscountPass {
     private float discountPercentage;
 
     public DiscountPass() {
-        this.passId = passIdCounter++;
-        setPassName();
-        this.discountPercentage = discountPercentage;
+        boolean b=false;
+        try {
+            b= setPassName(this);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if(b){
+        setDiscountPercentage();
+        try {
+            DatabaseUtil.insertDiscountPass(this.passName,this.discountPercentage);
+            setPassId();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         allDiscountPass.add(this);
+    }else{
+        System.out.println("Pass Not Added !");
+    }
+    }
+    public void setPassId() throws Exception{
+        String querry="SELECT passid FROM discountpass WHERE passname = ?";
+        PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(querry);
+        pst.setString(1, this.passName);
+        ResultSet rs=pst.executeQuery();
+        if(rs.next()){
+            this.passId=rs.getInt("passid");
+        }
     }
 
-    public void setPassName() {
+    public boolean setPassName(DiscountPass dp) throws Exception{
         String name;
-
+String querry="SELECT passname FROM discountpass WHERE passname= ?";
+PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(querry);
         while (true) {
             System.out.print("Enter name (32 characters or less): ");
             name = scanner.nextLine();
@@ -30,8 +59,17 @@ public class DiscountPass {
                 System.out.println("Name must be 32 characters or less. Please re-enter the name.");
             }
         }
+        pst.setString(1, name);
+        ResultSet rs=pst.executeQuery();
+        if(rs.next()){
+            System.out.println("Pass Not addedd ! pass name already exists.");
+            return false;
+        }else{
+            dp.passName = name;
+            return true;
+        }
 
-        this.passName = name;
+       
     }
 
     public void setDiscountPercentage() {

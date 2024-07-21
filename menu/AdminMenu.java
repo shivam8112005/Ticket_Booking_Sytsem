@@ -46,9 +46,10 @@ public class AdminMenu {
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        if (Admin.allAdmin.containsKey(username) && Admin.allAdmin.get(username).checkPassword(password)) {
+        if (Admin.allAdmin.containsKey(username) && Admin.allAdmin.get(username).checkPassword(password,currentAdmin)) {
             System.out.println("Login successful!");
             this.currentAdmin = Admin.allAdmin.get(username);
+            adminMenu();
         } else {
             System.out.println("Invalid username or password.");
         }
@@ -152,7 +153,12 @@ public class AdminMenu {
 
                                 switch (alterChoice) {
                                     case 1:
-                                        pass.setPassName();
+                                        try {
+                                            pass.setPassName(pass);
+                                        } catch (Exception e) {
+                                            // TODO Auto-generated catch block
+                                            e.printStackTrace();
+                                        }
                                         break;
                                     case 2:
                                         pass.setDiscountPercentage();
@@ -383,13 +389,13 @@ public class AdminMenu {
                     System.out.println("Phone Number: " + currentAdmin.getPhoneNumber());
                     break;
                 case 2:
-                    currentAdmin.setName();
+                    currentAdmin.setUserName(currentAdmin);
                     break;
                 case 3:
-                    currentAdmin.setPassword();
+                    currentAdmin.setPassword(currentAdmin);
                     break;
                 case 4:
-                    currentAdmin.setPhoneNumber();
+                    currentAdmin.setPhoneNumber(currentAdmin);
                     break;
                 case 5:
                     return;
