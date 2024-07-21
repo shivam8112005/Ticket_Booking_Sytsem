@@ -1,3 +1,6 @@
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -11,19 +14,35 @@ public class Admin {
     private String username;
     private String password;
     private String phoneNumber;
-
+    private static AdminMenu am=new AdminMenu();
     static HashMap<String, Admin> allAdmin = new HashMap<>();
     // Here we used Hashmap instead of LL because even though HM are faster O(1)
     // they take a lot of storage which is why we used on admin not costumer or
     // passenger
 
     public Admin() {
-
-        this.adminId = adminCounter++;
-        setName();
-        setPassword();
-        setPhoneNumber();
-        allAdmin.put(username, this);
+        boolean b=setUserName(this);
+        if(b){
+            setPassword(this);
+            setPhoneNumber(this);
+            DatabaseUtil.insertAdmin(this.username, this.password, this.phoneNumber);
+            setAdminId(username);
+            am.adminMenu();
+        }
+       
+    }
+    public void setAdminId(String username){
+        try{
+            String querry="SELECT id FROM admin WHERE username = ?";
+        PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(querry);
+        pst.setString(1, username);
+        ResultSet rs=pst.executeQuery();
+        if(rs.next()){
+            this.adminId=rs.getInt("id");
+        }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public static int getAdminCounter() {
@@ -38,15 +57,15 @@ public class Admin {
         return username;
     }
 
-    public Boolean checkPassword(String password) {
-        return password.equals(this.password);
+    public Boolean checkPassword(String password,Admin a) {
+        return password.equals(a.password);
     }
 
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setName() {
+    public boolean setUserName(Admin a) {
         String name;
 
         while (true) {
@@ -59,17 +78,44 @@ public class Admin {
                 System.out.println("Name must be 32 characters or less. Please re-enter the name.");
             }
         }
-
-        this.username = name;
+        boolean b=getUserName(name);
+        if(!b){
+            a.username = name;
+            return true;
+        }System.out.println("Username already exists !");
+        return false;
+       
+    }
+    public boolean getUserName(String username) {
+        String querry="SELECT * FROM admin WHERE username = ?";
+        PreparedStatement pst;
+        try {
+            pst = DatabaseUtil.getConnection().prepareStatement(querry);
+            pst.setString(1, username);
+            ResultSet rs=pst.executeQuery();
+            if(rs.next()){
+                return true;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+       
     }
 
-    public void setPhoneNumber() {
-
+    public void setPhoneNumber(Admin a) {
+        String ph;
         while (true) {
             System.out.print("Enter phone number: ");
-            this.phoneNumber = scanner.nextLine();
+            ph = scanner.nextLine();
 
             if (isValidPhoneNumber(phoneNumber)) {
+                a.phoneNumber=ph;
                 break;
             } else {
                 System.out.println("Invalid phone number. Please re-enter the phone number.");
@@ -84,7 +130,7 @@ public class Admin {
         return Pattern.matches(phonePattern, phoneNumber);
     }
 
-    public String setPassword() {
+    public String setPassword(Admin a) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
         // Password must contain at least one digit, one lowercase,
         // one uppercase letter, and be at least 8 characters long
@@ -92,7 +138,7 @@ public class Admin {
             System.out.print("Enter password: ");
             String password = scanner.nextLine();
             if (Pattern.matches(regex, password)) {
-                return password;
+                a.password= password;
             } else {
                 System.out.println(
                         "Invalid password. Password must be at least 8 characters long, contain at least one digit, one lowercase letter, and one uppercase letter.");
