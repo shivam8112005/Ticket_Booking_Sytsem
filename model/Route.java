@@ -10,6 +10,10 @@ public class Route {
     private String startLocation;
     private String endLocation;
 
+    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private static String user = "root";
+    private static String password = "";
+
     private static final Scanner scanner = new Scanner(System.in);
 
     // No-argument constructor
@@ -31,10 +35,6 @@ public class Route {
 
     // Method to add the route details to the database
     public void addRouteToDB(String startLocation, String endLocation) {
-        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-        String user = "root";
-        String password = "";
-
         String query = "INSERT INTO Route (StartLocation, EndLocation) VALUES (?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -56,10 +56,6 @@ public class Route {
 
     // Method to retrieve a Route object from the database using the RouteID
     public static Route getRouteFromDB(int routeID) {
-        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-        String user = "root";
-        String password = "";
-
         String query = "SELECT * FROM Route WHERE RouteID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
