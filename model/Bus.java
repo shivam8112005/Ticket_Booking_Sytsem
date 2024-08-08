@@ -1,38 +1,35 @@
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Bus {
-    private Scanner scanner = new Scanner(System.in);
-    private static HashMap<Bus,Trip> allBus = new HashMap<>();
-    //  HashMap<Bus,Ticket> busTicketPrices = new HashMap<>();
-    static int busCounter = 1;
-    double price;
-    private int busId;
+    private int busID;
     private String numberPlate;
-    private Trip route;
-    public Seat[][] busSeats;// 2d array of seats aka rectangle
-    public Bus(int a){
+    private int numberOfSeats;
 
-    }
-    public Bus(Trip trip) {
-        System.out.println("Enter Bus Details: ");
-        this.busId = busCounter++;
+    private static final Scanner scanner = new Scanner(System.in);
+
+    // No-argument constructor
+    public Bus() {
+        System.out.println("Enter Bus Details:");
         setNumberPlate();
-        setRoute();
-        setBusSeats();
-        allBus.put(this,trip);
+        System.out.print("Enter number of seats: ");
+        this.numberOfSeats = scanner.nextInt();
+        addBusToDB(numberPlate, numberOfSeats);
     }
 
-    public int getBusId() {
-        return this.busId;
+    // Parameterized constructor
+    public Bus(int busID, String numberPlate, int numberOfSeats) {
+        this.busID = busID;
+        this.numberPlate = numberPlate;
+        this.numberOfSeats = numberOfSeats;
     }
 
-    public String getNumberPlate() {
-        return this.numberPlate;
-    }
-
+    // Method to set the number plate with validation
     public void setNumberPlate() {
         String platePattern = "^[A-Z]{2}[0-9]{2} [A-Z]{1,2} [0-9]{1,4}$";
         while (true) {
@@ -47,101 +44,81 @@ public class Bus {
         }
     }
 
-    public void setRoute() {
-        while (true) {
-            System.out.println("Available routes:");
-            for (Trip route : Trip.getAllTrip()) {
-                System.out.println(route.getTripId() + ": " + route.getName());
+    // Method to add the bus details to the database
+    public void addBusToDB(String numberPlate, int numberOfSeats) {
+        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+        String user = "root";
+        String password = "";
+
+        String query = "INSERT INTO Bus (NumberPlate, NumberOfSeats) VALUES (?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, numberPlate);
+            stmt.setInt(2, numberOfSeats);
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                this.busID = rs.getInt(1);
+                System.out.println("Bus added with ID: " + this.busID);
             }
-            System.out.println("0: Add new route");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            System.out.print("Select a route by entering the route ID: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+    // Method to retrieve a Bus object from the database using the BusID
+    public static Bus getBusFromDB(int busID) {
+        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+        String user = "root";
+        String password = "";
 
-            if (choice == 0) {
-                this.route = new Trip();
-                break;
+        String query = "SELECT * FROM Bus WHERE BusID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, busID);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String numberPlate = rs.getString("NumberPlate");
+                int numberOfSeats = rs.getInt("NumberOfSeats");
+                return new Bus(busID, numberPlate, numberOfSeats);
             } else {
-                boolean found = false;
-                for (Trip route : Trip.getAllTrip()) {
-                    if (route.getTripId() == choice) {
-                        this.route = route;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    break;
-                } else {
-                    System.out.println("Invalid route ID. Please try again.");
-                }
+                System.out.println("No bus found with ID: " + busID);
+                return null;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    public void setBusSeats() {
-        // Initializes bus seats
-        System.out.print("Enter the number of rows: ");
-        int rows = scanner.nextInt();
-        System.out.print("Enter the number of columns: ");
-        int columns = scanner.nextInt();
-        scanner.nextLine();
-        busSeats = new Seat[rows][columns];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                busSeats[i][j] = new Seat((i * columns) + j + 1, this);
-            }
-        }
-    }
-    public boolean bookSeat(int row, int column, Passenger passenger) {
-        if (row < 0 || row >= busSeats.length || column < 0 || column >= busSeats[0].length) {
-            System.out.println("Invalid seat position.");
-            return false;
-        }
-        
-        Seat seat = busSeats[row][column];
-        if (seat.isOccupied()) {
-            System.out.println("Seat already occupied.");
-            return false;
-        } else {
-            seat.setOccupied(true);
-            seat.setPassenger(passenger);
-            return true;
-        }
+    // Getters and setters
+    public void setBusID(int busID) {
+        this.busID = busID;
     }
 
-    public static void printAllBus() {
-        for (Bus bus : Bus.getAllBus().keySet()) {
-            System.out.println("Bus ID: " + bus.getBusId());
-            System.out.println("Number Plate: " + bus.getNumberPlate());
-            System.out.println("Route: " + bus.getRoute().getName());
-            System.out.println(
-                    "Seats: " + bus.busSeats.length + " rows, " + bus.busSeats[0].length + " columns");
-            System.out.println();
-        }
+    public void setNumberPlate(String numberPlate) {
+        this.numberPlate = numberPlate;
     }
 
-    public static HashMap<Bus,Trip> getAllBus() {
-        return allBus;
+    public void setNumberOfSeats(int numberOfSeats) {
+        this.numberOfSeats = numberOfSeats;
     }
 
-    public static int getBusCounter() {
-        return busCounter;
+    public int getBusID() {
+        return busID;
     }
 
-    public Trip getRoute() {
-        return route;
+    public String getNumberPlate() {
+        return numberPlate;
     }
-    public void bookTicket(){
 
-    }
-    @Override
-    public String toString() {
-        return "Bus{" +
-                "busId=" + busId +
-                ", numberPlate='" + numberPlate + '\'' +
-                ", route=" + route.getName() +
-                '}';
+    public int getNumberOfSeats() {
+        return numberOfSeats;
     }
 }
