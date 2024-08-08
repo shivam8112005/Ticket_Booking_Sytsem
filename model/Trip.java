@@ -1,132 +1,132 @@
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 
 public class Trip {
-    // java.sql.Time tripTime = resultSet.getTime("trip_time");
-    private static Scanner scanner = new Scanner(System.in);
-     static LinkedList<Trip> allTrip = new LinkedList<>();
-    static int tripCounter = 1;
-    private int tripId;
-    private String startLocation;
-    private LocalDateTime startTime;
-    private String endLocation;
-    private LocalDateTime endTime;
+    private int tripID;
+    private int routeID;
+    private int busID;
+    private Timestamp startTime;
+    private Timestamp endTime;
+
+    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private static String user = "root";
+    private static String password = "";
+
+    private static final Scanner scanner = new Scanner(System.in);
+
+    // No-argument constructor
     public Trip() {
-        this.tripId = tripCounter++;
-        this.startLocation = setLocation("Enter start location (max 64 characters): ");
-        this.startTime = setTime("Enter start time (format: yyyy-MM-dd HH:mm): ");
-        this.endLocation = setLocation("Enter end location (max 64 characters): ");
-        this.endTime = setTime("Enter end time (format: yyyy-MM-dd HH:mm): ");
-        allTrip.add(this);
+        System.out.println("Enter Trip Details:");
+
+        System.out.print("Enter Route ID: ");
+        this.routeID = scanner.nextInt();
+
+        System.out.print("Enter Bus ID: ");
+        this.busID = scanner.nextInt();
+
+        scanner.nextLine(); // consume line
+
+        System.out.print("Enter Start Time (YYYY-MM-DD HH:MM:SS): ");
+        this.startTime = Timestamp.valueOf(scanner.nextLine());
+
+        System.out.print("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
+        this.endTime = Timestamp.valueOf(scanner.nextLine());
+
+        addTripToDB(routeID, busID, startTime, endTime);
     }
 
-    public Trip(String startLocation, LocalDateTime startTime, String endLocation, LocalDateTime endTime) {
-        this.tripId = tripCounter++;
-        this.startLocation = startLocation;
+    // Parameterized constructor
+    public Trip(int tripID, int routeID, int busID, Timestamp startTime, Timestamp endTime) {
+        this.tripID = tripID;
+        this.routeID = routeID;
+        this.busID = busID;
         this.startTime = startTime;
-        this.endLocation = endLocation;
         this.endTime = endTime;
-        allTrip.add(this);
     }
 
-    public int getTripId() {
-        return this.tripId;
+    // Method to add the trip details to the database
+    public void addTripToDB(int routeID, int busID, Timestamp startTime, Timestamp endTime) {
+
+        String query = "INSERT INTO Trip (RouteID, BusID, StartTime, EndTime) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setInt(1, routeID);
+            stmt.setInt(2, busID);
+            stmt.setTimestamp(3, startTime);
+            stmt.setTimestamp(4, endTime);
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                this.tripID = rs.getInt(1);
+                System.out.println("Trip added with ID: " + this.tripID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public String getStartLocation() {
-        return this.startLocation;
-    }
+    // Method to retrieve a Trip object from the database using the TripID
+    public static Trip getTripFromDB(int tripID) {
 
-    public String setLocation(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine();
-            if (input.length() <= 64) {
-                this.startLocation = input;
-                return input;
+        String query = "SELECT * FROM Trip WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, tripID);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int routeID = rs.getInt("RouteID");
+                int busID = rs.getInt("BusID");
+                Timestamp startTime = rs.getTimestamp("StartTime");
+                Timestamp endTime = rs.getTimestamp("EndTime");
+                return new Trip(tripID, routeID, busID, startTime, endTime);
             } else {
-                System.out.println("Start location must be 64 characters or less. Please re-enter.");
+                System.out.println("No trip found with ID: " + tripID);
+                return null;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    public void setStartLocation() {
-        this.startLocation = setLocation("Enter start location (max 64 characters): ");
-    }
-
-    public static LinkedList<Trip> getAllTrip() {
-        return allTrip;
-    }
-
-    public static LocalDateTime setTime(String prompt) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); // Pattern for date and time
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine();
-            try {
-                return LocalDateTime.parse(input, formatter); // Parse input to LocalDateTime
-            } catch (Exception e) {
-                System.out.println("Invalid date/time format. Please enter in 'yyyy-MM-dd HH:mm' format.");
-            }
-        }
-    }
-
-    public boolean isPending() {
-        return this.endTime.isAfter(LocalDateTime.now()); // Check if end time is after current time
-    }
-
-    public int getTripCounter() {
-        return tripCounter;
-    }
-
-    public LocalDateTime getStartTime() {
-        return this.startTime;
-    }
-
-    public void setStartTime() {
-        this.startTime = setTime("Enter start time: ");
-    }
-
-    public String getEndLocation() {
-        return this.endLocation;
-    }
-
-    public void setEndLocation() {
-        this.endLocation = setLocation("Enter end location (max 64 characters): ");
-    }
-
-    public LocalDateTime getEndTime() {
-        return this.endTime;
-    }
-
-    public void setEndTime() {
-        this.endTime = setTime("Enter end time: ");
-    }
-
+    // Method to get the name of the trip (startLocation to endLocation)
     public String getName() {
-        return this.startLocation + " to " + this.endLocation;
-    }
 
-    public static void printAllTrip() {
-        for (Trip trip : getAllTrip()) {
-            System.out.println("Trip ID: " + trip.getTripId() +
-                    ", Start Location: " + trip.getStartLocation() +
-                    ", Start Time: " + trip.getStartTime() +
-                    ", End Location: " + trip.getEndLocation() +
-                    ", End Time: " + trip.getEndTime());
+        String query = "SELECT r.StartLocation, r.EndLocation FROM Route r JOIN Trip t ON r.RouteID = t.RouteID WHERE t.TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, this.tripID);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String startLocation = rs.getString("StartLocation");
+                String endLocation = rs.getString("EndLocation");
+                return startLocation + " to " + endLocation;
+            } else {
+                return "Route not found for this trip.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Error retrieving route.";
         }
     }
 
-    @Override
-    public String toString() {
-        return "trip{" +
-                "tripId=" + tripId +
-                ", startLocation='" + startLocation + '\'' +
-                ", startTime='" + startTime + '\'' +
-                ", endLocation='" + endLocation + '\'' +
-                ", endTime='" + endTime + '\'' +
-                '}';
+    // Method to calculate the time taken for the trip
+    public long getTimeTakenForTrip() {
+        long duration = endTime.getTime() - startTime.getTime(); // duration in milliseconds
+        return duration / (1000 * 60); // convert to minutes
     }
 }
