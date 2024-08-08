@@ -11,6 +11,10 @@ public class Bus {
     private String numberPlate;
     private int numberOfSeats;
 
+    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private static String user = "root";
+    private static String password = "";
+
     private static final Scanner scanner = new Scanner(System.in);
 
     // No-argument constructor
