@@ -84,6 +84,16 @@ public class DatabaseUtil {
             System.out.println("Exception Thrown+++" + e);
         }
     }
+    public static void deleteDiscountPass(int id){
+        try{
+            String querry="DELETE FROM discountpass WHERE passid = ?";
+            PreparedStatement pst=getConnection().prepareStatement(querry);
+            pst.setInt(1, id);
+            pst.executeUpdate();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
 
     // public static void setDiscPass() throws Exception {
     //     LinkedList<DiscountPass> discountPasses = new LinkedList<>();
@@ -108,7 +118,28 @@ public class DatabaseUtil {
             System.out.println("pass Added Successfully .");
         }
     }
-
+    public static void alterDiscountPassName(String name,int passid){
+        try{
+            String querry="UPDATE discountpass SET passname = ? WHERE passid = ?";
+        PreparedStatement pst=getConnection().prepareStatement(querry);
+        pst.setString(1, name);
+        pst.setInt(2, passid);
+        pst.executeUpdate();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+    public static void alterDiscountPasspercent(float percent, int id){
+        try{
+            String querry="UPDATE discountpass SET discountpercent = ? WHERE passid = ?";
+        PreparedStatement pst=getConnection().prepareStatement(querry);
+        pst.setFloat(1, percent);
+        pst.setInt(2, id);
+        pst.executeUpdate();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
     // // try {
     // Connection con = getConnection();
     // CallableStatement cst = con.prepareCall("{call viewDiscountPass(?,?,?)}");

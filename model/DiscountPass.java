@@ -77,7 +77,6 @@ PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(querry);
             System.out.print("Enter discount percentage (0-100): ");
             float discountPercentage = scanner.nextFloat();
             scanner.nextLine(); // Clear the buffer
-
             if (discountPercentage >= 0 && discountPercentage <= 100) {
                 this.discountPercentage = discountPercentage;
                 System.out.println("Discount percentage set successfully!");
@@ -113,7 +112,7 @@ PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(querry);
         return passName;
     }
 
-    public double getDiscountPercentage() {
+    public float getDiscountPercentage() {
         return discountPercentage;
     }
 
