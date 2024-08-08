@@ -1,0 +1,124 @@
+-- Create the database
+CREATE DATABASE IF NOT EXISTS ticket_booking_db;
+
+-- Use the database
+USE ticket_booking_db;
+
+-- Create the Bus table
+CREATE TABLE IF NOT EXISTS Bus (
+    BusID INT PRIMARY KEY AUTO_INCREMENT,
+    NumberPlate VARCHAR(10),
+    NumberOfSeats INT
+);
+
+-- Create the Route table
+CREATE TABLE IF NOT EXISTS Route (
+    RouteID INT PRIMARY KEY AUTO_INCREMENT,
+    StartLocation VARCHAR(50),
+    EndLocation VARCHAR(50)
+);
+
+-- Create the Trip table
+CREATE TABLE IF NOT EXISTS Trip (
+    TripID INT PRIMARY KEY AUTO_INCREMENT,
+    BusID INT,
+    RouteID INT,
+    StartTime TIMESTAMP,
+    EndTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (BusID) REFERENCES Bus(BusID),
+    FOREIGN KEY (RouteID) REFERENCES Route(RouteID)
+);
+
+-- Create the DiscountPass table
+CREATE TABLE IF NOT EXISTS DiscountPass (
+    DiscountPassID INT PRIMARY KEY AUTO_INCREMENT,
+    PassName VARCHAR(30),
+    DiscountPercentage FLOAT
+);
+
+-- Create the Passenger table
+CREATE TABLE IF NOT EXISTS Passenger (
+    PassengerID INT PRIMARY KEY AUTO_INCREMENT,
+    PassengerName VARCHAR(30),
+    PassengerNumber CHAR(10),
+    PassengerEmail VARCHAR(20),
+    PassengerDOB DATE,
+    DiscountPassID INT,
+    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID)
+);
+
+-- Create the Customer table
+CREATE TABLE IF NOT EXISTS Customer (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerName VARCHAR(30),
+    CustomerNumber CHAR(10),
+    CustomerEmail VARCHAR(20),
+    CustomerDOB DATE,
+    Password VARCHAR(15),
+    DiscountPassID INT,
+    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID)
+);
+
+-- Create the Ticket table
+CREATE TABLE IF NOT EXISTS Ticket (
+    TicketID INT PRIMARY KEY AUTO_INCREMENT,
+    TripID INT,
+    BookedBy INT,
+    BookedFor INT,
+    BookTime TIMESTAMP,
+    FOREIGN KEY (TripID) REFERENCES Trip(TripID),
+    FOREIGN KEY (BookedBy) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (BookedFor) REFERENCES Passenger(PassengerID)
+);
+
+------------------------Procedures and Triggers-------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE CreateTripSeats(IN trip_id INT)
+BEGIN
+    DECLARE bus_id INT;
+    DECLARE num_of_seats INT;
+    DECLARE seat_num INT;
+
+    -- Get the BusID from the Trip table using the provided trip_id
+    SELECT BusID INTO bus_id FROM Trip WHERE TripID = trip_id;
+
+    -- Get the number of seats for the bus
+    SELECT NumberOfSeats INTO num_of_seats FROM Bus WHERE BusID = bus_id;
+
+    -- Construct the query to create the TripSeat_tripid table dynamically
+    SET @query = CONCAT('CREATE TABLE TripSeat_', trip_id, ' (',
+                        'SeatNumber INT PRIMARY KEY, ',
+                        'TicketID INT NULL, ',
+                        'FOREIGN KEY (TicketID) REFERENCES Ticket(TicketID))');
+
+    -- Execute the dynamic query
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- Insert seat numbers into the new TripSeat table
+    SET seat_num = 1;
+    WHILE seat_num <= num_of_seats DO
+        SET @insert_query = CONCAT('INSERT INTO TripSeat_', trip_id, ' (SeatNumber) VALUES (', seat_num, ')');
+        PREPARE insert_stmt FROM @insert_query;
+        EXECUTE insert_stmt;
+        DEALLOCATE PREPARE insert_stmt;
+
+        SET seat_num = seat_num + 1;
+    END WHILE;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER after_trip_insert
+AFTER INSERT ON Trip
+FOR EACH ROW
+BEGIN
+    CALL CreateTripSeats(NEW.TripID);
+END$$
+
+DELIMITER ;
