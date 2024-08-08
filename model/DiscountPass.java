@@ -10,6 +10,10 @@ public class DiscountPass {
     private String name;
     private float discountPercentage;
 
+    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private static String user = "root";
+    private static String password = "";
+
     private static final Scanner scanner = new Scanner(System.in);
 
     // No-argument constructor
@@ -31,10 +35,6 @@ public class DiscountPass {
 
     // Method to add the discount pass details to the database
     public void addDiscountPassToDB(String name, float discountPercentage) {
-        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-        String user = "root";
-        String password = "";
-
         String query = "INSERT INTO DiscountPass (PassName, DiscountPercentage) VALUES (?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -57,10 +57,6 @@ public class DiscountPass {
     // Method to retrieve a DiscountPass object from the database using the
     // DiscountPassID
     public static DiscountPass getDiscountPassFromDB(int discountPassID) {
-        String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-        String user = "root";
-        String password = "";
-
         String query = "SELECT * FROM DiscountPass WHERE DiscountPassID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
