@@ -16,10 +16,11 @@ public class Main {
             choice = scanner.nextInt();
             switch (choice) {
                 case 1:
-                    Customer.customerLogIn();
+                    // Customer.customerLogIn();
                     break;
                 case 2:
-                    AdminMenu.adminLoginPage();
+                    AdminMenu am = new AdminMenu();
+                    am.signUpMenu();
                     break;
                 case 3:
                     System.out.println("Closing the program");
