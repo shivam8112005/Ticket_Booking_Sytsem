@@ -19,7 +19,7 @@ public class Route {
         this.startLocation = scanner.nextLine();
         System.out.print("Enter end location: ");
         this.endLocation = scanner.nextLine();
-        addStartLocationToDB(startLocation, endLocation);
+        addRouteToDB(startLocation, endLocation);
     }
 
     // Parameterized constructor
@@ -30,10 +30,10 @@ public class Route {
     }
 
     // Method to add the route details to the database
-    public void addStartLocationToDB(String startLocation, String endLocation) {
+    public void addRouteToDB(String startLocation, String endLocation) {
         String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
         String user = "root";
-        String password = ""; // No password as per your setup
+        String password = "";
 
         String query = "INSERT INTO Route (StartLocation, EndLocation) VALUES (?, ?)";
 
@@ -58,7 +58,7 @@ public class Route {
     public static Route getRouteFromDB(int routeID) {
         String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
         String user = "root";
-        String password = ""; // No password as per your setup
+        String password = "";
 
         String query = "SELECT * FROM Route WHERE RouteID = ?";
 
@@ -83,6 +83,14 @@ public class Route {
     }
 
     // Getters and setters (optional, depending on your needs)
+    public void setStartLocation(String startLocation) {
+        this.startLocation = startLocation;
+    }
+
+    public void setEndLocation(String endLocation) {
+        this.endLocation = endLocation;
+    }
+
     public int getRouteID() {
         return routeID;
     }
