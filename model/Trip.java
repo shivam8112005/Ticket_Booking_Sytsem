@@ -12,6 +12,7 @@ public class Trip {
     private int busID;
     private Timestamp startTime;
     private Timestamp endTime;
+    private double price; // Added price attribute
 
     private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private static String user = "root";
@@ -37,16 +38,20 @@ public class Trip {
         System.out.print("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
         this.endTime = Timestamp.valueOf(scanner.nextLine());
 
-        addTripToDB(routeID, busID, startTime, endTime);
+        System.out.print("Enter Price: "); // Input for price
+        this.price = scanner.nextDouble();
+
+        addTripToDB(routeID, busID, startTime, endTime, price); // Updated to include price
     }
 
     // Parameterized constructor
-    public Trip(int tripID, int routeID, int busID, Timestamp startTime, Timestamp endTime) {
+    public Trip(int tripID, int routeID, int busID, Timestamp startTime, Timestamp endTime, double price) {
         this.tripID = tripID;
         this.routeID = routeID;
         this.busID = busID;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.price = price;
     }
 
     public Trip(int a) {
@@ -54,9 +59,13 @@ public class Trip {
     }
 
     // Method to add the trip details to the database
-    public void addTripToDB(int routeID, int busID, Timestamp startTime, Timestamp endTime) {
+    public void addTripToDB(int routeID, int busID, Timestamp startTime, Timestamp endTime, double price) {
 
-        String query = "INSERT INTO Trip (RouteID, BusID, StartTime, EndTime) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO Trip (RouteID, BusID, StartTime, EndTime, Price) VALUES (?, ?, ?, ?, ?)"; // Updated
+                                                                                                              // query
+                                                                                                              // to
+                                                                                                              // include
+                                                                                                              // price
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -65,6 +74,7 @@ public class Trip {
             stmt.setInt(2, busID);
             stmt.setTimestamp(3, startTime);
             stmt.setTimestamp(4, endTime);
+            stmt.setDouble(5, price); // Set price parameter
             stmt.executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
@@ -93,7 +103,8 @@ public class Trip {
                 int busID = rs.getInt("BusID");
                 Timestamp startTime = rs.getTimestamp("StartTime");
                 Timestamp endTime = rs.getTimestamp("EndTime");
-                return new Trip(tripID, routeID, busID, startTime, endTime);
+                double price = rs.getDouble("Price"); // Retrieve price from database
+                return new Trip(tripID, routeID, busID, startTime, endTime, price); // Updated constructor call
             } else {
                 System.out.println("No trip found with ID: " + tripID);
                 return null;
@@ -132,5 +143,10 @@ public class Trip {
     public long getTimeTakenForTrip() {
         long duration = endTime.getTime() - startTime.getTime(); // duration in milliseconds
         return duration / (1000 * 60); // convert to minutes
+    }
+
+    // Getter for price
+    public double getPrice() {
+        return this.price;
     }
 }
