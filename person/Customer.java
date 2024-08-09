@@ -17,7 +17,7 @@ public class Customer {
     private int discountPassId;
 
     // No-parameter constructor
-    public Customer() {
+    public Customer(String email) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Enter Customer Details");
@@ -31,10 +31,7 @@ public class Customer {
             System.out.println("Invalid phone number. Please re-enter the phone number:");
             this.phoneNumber = scanner.nextLine();
         }
-
-        System.out.println("Enter Email: ");
-        this.email = scanner.nextLine();
-
+        this.email = email;
         System.out.println("Enter Password: ");
         this.password = scanner.nextLine();
 
@@ -171,5 +168,39 @@ public class Customer {
 
     public void setDiscountPassId(int discountPassId) {
         this.discountPassId = discountPassId;
+    }
+    public boolean isValidEmail(String email) {
+        // Simple validation to check the email format contains "@" and "."
+        int atPosition = email.indexOf('@');
+        int dotPosition = email.lastIndexOf('.');
+        return atPosition > 0 && dotPosition > atPosition;
+    }
+    public static Customer getUserByEmail(String email) throws Exception {
+        Customer user = null;
+        try (Connection connection = DatabaseUtil.getConnection()) {
+            String query = "SELECT * FROM customer WHERE email = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                user = new Customer(10);
+                user.setId(resultSet.getInt("CustomerID"));
+                user.setName(resultSet.getString("CustomerName"));
+                user.setEmail(resultSet.getString("CustomerEmail"));
+             //   user.setExperience(resultSet.getString("experience"));
+                user.setPhoneNumber(resultSet.getString("CustomerNumber"));
+               user.dob=resultSet.getDate("CustomerDOB");
+                user.setPassword(resultSet.getString("password"));
+                user.setDiscountPassId(resultSet.getInt("DiscountPassID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    private void setId(int int1) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setId'");
     }
 }
