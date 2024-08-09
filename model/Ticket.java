@@ -1,63 +1,133 @@
-import java.util.LinkedList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 
-public class Ticket extends Bus{
-    private static Scanner scanner = new Scanner(System.in);
-    private static LinkedList<Ticket> allTickets = new LinkedList<>();
-    private static int ticketCounter = 1;
+public class Ticket {
 
-    private final int ticketId;
-    private final long transactionTimestamp;
-     
-    private final Bus bus;
-    private final Passenger passenger;
+    private int ticketID;
+    private int tripID;
+    private int bookedBy; // CustomerID
+    private int bookedFor; // PassengerID
+    private Timestamp bookTime;
 
-    public Ticket(double price, Bus bus, Passenger passenger) {
-        super(10);
-        this.ticketId = ticketCounter++;
-        this.transactionTimestamp = System.currentTimeMillis();
-        this.price = price;
-        this.bus = bus;
-     this.passenger = passenger;
-        allTickets.add(this);
+    // No-parameter constructor
+    public Ticket() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter Ticket Details");
+
+        System.out.println("Enter Trip ID: ");
+        this.tripID = scanner.nextInt();
+
+        System.out.println("Enter Customer ID (Booked By): ");
+        this.bookedBy = scanner.nextInt();
+
+        System.out.println("Enter Passenger ID (Booked For): ");
+        this.bookedFor = scanner.nextInt();
+
+        // Capture the current timestamp for bookTime
+        this.bookTime = new Timestamp(System.currentTimeMillis());
+
+        // Call the method to add the ticket to the database
+        addTicketToDB(this.tripID, this.bookedBy, this.bookedFor, this.bookTime);
     }
 
-    public static LinkedList<Ticket> getAllTickets() {
-        return allTickets;
+    // Parameterized constructor
+    public Ticket(int ticketID, int tripID, int bookedBy, int bookedFor, Timestamp bookTime) {
+        this.ticketID = ticketID;
+        this.tripID = tripID;
+        this.bookedBy = bookedBy;
+        this.bookedFor = bookedFor;
+        this.bookTime = bookTime;
     }
 
-    public static int getTicketCounter() {
-        return ticketCounter;
+    public Ticket(int a) {
+        // A constructor that is only to access methods
     }
 
-    public int getTicketId() {
-        return ticketId;
+    // Method to add a ticket to the database
+    public void addTicketToDB(int tripID, int bookedBy, int bookedFor, Timestamp bookTime) {
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
+                "username", "password")) {
+            String sql = "INSERT INTO Ticket (TripID, BookedBy, BookedFor, BookTime) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, tripID);
+            preparedStatement.setInt(2, bookedBy);
+            preparedStatement.setInt(3, bookedFor);
+            preparedStatement.setTimestamp(4, bookTime);
+
+            preparedStatement.executeUpdate();
+            System.out.println("Ticket added successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public long getTransactionTimestamp() {
-        return transactionTimestamp;
+    // Method to retrieve a ticket from the database using the TicketID
+    public Ticket getTicketFromDB(int ticketID) {
+        Ticket ticket = null;
+
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
+                "username", "password")) {
+            String sql = "SELECT * FROM Ticket WHERE TicketID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, ticketID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int id = resultSet.getInt("TicketID");
+                int tripID = resultSet.getInt("TripID");
+                int bookedBy = resultSet.getInt("BookedBy");
+                int bookedFor = resultSet.getInt("BookedFor");
+                Timestamp bookTime = resultSet.getTimestamp("BookTime");
+
+                ticket = new Ticket(id, tripID, bookedBy, bookedFor, bookTime);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ticket;
     }
 
-    public double getPrice() {
-        return price;
+    // Getters and setters
+    public int getTicketID() {
+        return ticketID;
     }
 
-    public Bus getBus() {
-        return bus;
+    public int getTripID() {
+        return tripID;
     }
 
-    public Passenger getPassenger() {
-        return passenger;
+    public void setTripID(int tripID) {
+        this.tripID = tripID;
     }
 
-    @Override
-    public String toString() {
-        return "Ticket{" +
-                "ticketId=" + ticketId +
-                ", transactionTimestamp=" + transactionTimestamp +
-                ", busId=" + bus.getBusId() +
-                ", passenger=" + passenger.getName() +
-                ", price=" + price +
-                '}';
+    public int getBookedBy() {
+        return bookedBy;
+    }
+
+    public void setBookedBy(int bookedBy) {
+        this.bookedBy = bookedBy;
+    }
+
+    public int getBookedFor() {
+        return bookedFor;
+    }
+
+    public void setBookedFor(int bookedFor) {
+        this.bookedFor = bookedFor;
+    }
+
+    public Timestamp getBookTime() {
+        return bookTime;
+    }
+
+    public void setBookTime(Timestamp bookTime) {
+        this.bookTime = bookTime;
     }
 }
