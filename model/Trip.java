@@ -49,6 +49,10 @@ public class Trip {
         this.endTime = endTime;
     }
 
+    public Trip(int a) {
+        // A constructor that is only to access methods
+    }
+
     // Method to add the trip details to the database
     public void addTripToDB(int routeID, int busID, Timestamp startTime, Timestamp endTime) {
 
