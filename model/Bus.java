@@ -33,6 +33,10 @@ public class Bus {
         this.numberOfSeats = numberOfSeats;
     }
 
+    public Bus(int a) {
+        // A constructor that is only to access methods
+    }
+
     // Method to set the number plate with validation
     public void setNumberPlate() {
         String platePattern = "^[A-Z]{2}[0-9]{2} [A-Z]{1,2} [0-9]{1,4}$";
