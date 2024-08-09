@@ -18,13 +18,14 @@ CREATE TABLE IF NOT EXISTS Route (
     EndLocation VARCHAR(50)
 );
 
--- Create the Trip table
+-- Create the Trip table with the additional Price column
 CREATE TABLE IF NOT EXISTS Trip (
     TripID INT PRIMARY KEY AUTO_INCREMENT,
     BusID INT,
     RouteID INT,
     StartTime TIMESTAMP,
     EndTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Price DECIMAL(10, 2),
     FOREIGN KEY (BusID) REFERENCES Bus(BusID),
     FOREIGN KEY (RouteID) REFERENCES Route(RouteID)
 );
@@ -71,10 +72,10 @@ CREATE TABLE IF NOT EXISTS Ticket (
     FOREIGN KEY (BookedFor) REFERENCES Passenger(PassengerID)
 );
 
-------------------------Procedures and Triggers-------------------------
-
+--Procedures and Triggers
 DELIMITER $$
 
+-- Procedure to create seats dynamically for a trip
 CREATE PROCEDURE CreateTripSeats(IN trip_id INT)
 BEGIN
     DECLARE bus_id INT;
@@ -114,6 +115,7 @@ DELIMITER ;
 
 DELIMITER $$
 
+-- Trigger to call the procedure after inserting a new trip
 CREATE TRIGGER after_trip_insert
 AFTER INSERT ON Trip
 FOR EACH ROW
