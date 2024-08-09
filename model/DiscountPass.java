@@ -33,6 +33,10 @@ public class DiscountPass {
         this.discountPercentage = discountPercentage;
     }
 
+    public DiscountPass(int a) {
+        // A constructor that is only to access methods
+    }
+
     // Method to add the discount pass details to the database
     public void addDiscountPassToDB(String name, float discountPercentage) {
         String query = "INSERT INTO DiscountPass (PassName, DiscountPercentage) VALUES (?, ?)";
