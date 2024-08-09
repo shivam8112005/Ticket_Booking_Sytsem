@@ -33,6 +33,10 @@ public class Route {
         this.endLocation = endLocation;
     }
 
+    public Route(int a) {
+        // A constructor that is only to access methods
+    }
+
     // Method to add the route details to the database
     public void addRouteToDB(String startLocation, String endLocation) {
         String query = "INSERT INTO Route (StartLocation, EndLocation) VALUES (?, ?)";
