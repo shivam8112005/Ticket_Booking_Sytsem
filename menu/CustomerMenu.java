@@ -1,4 +1,9 @@
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -114,7 +119,7 @@ public class CustomerMenu extends Customer{
         }
        }
     }
-    private void customermenu() {
+    private void customermenu() throws Exception{
         boolean exit=true;
        while(exit){
         System.out.println("1. Book Ticket");
@@ -128,7 +133,7 @@ public class CustomerMenu extends Customer{
             case 1:
                 break;
             case 2:
-                
+            viewBuses();
                 break;
             case 3:
                 
@@ -144,5 +149,62 @@ public class CustomerMenu extends Customer{
         }
        }
     }
-    
+  
+
+    public static void viewBuses() throws Exception{
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Trip Start Time (YYYY-MM-DD HH:MM:SS): ");
+        String startTime = scanner.nextLine();
+
+        System.out.print("Enter Start Location: ");
+        String startLocation = scanner.nextLine();
+
+        System.out.print("Enter End Location: ");
+        String endLocation = scanner.nextLine();
+
+        try (Connection connection = DatabaseUtil.getConnection()) {
+            String query = "SELECT bus.BusID, bus.NumberPlate, bus.NumberOfSeats, trip.StartTime, trip.EndTime, trip.Price " +
+                           "FROM bus " +
+                           "JOIN trip ON bus.BusID = trip.BusID " +
+                           "JOIN route ON trip.RouteID = route.RouteID " +
+                           "WHERE trip.StartTime >= ? AND route.StartLocation = ? AND route.EndLocation = ?";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, startTime);
+                statement.setString(2, startLocation);
+                statement.setString(3, endLocation);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    boolean busesFound = false;
+
+                    while (resultSet.next()) {
+                        busesFound = true;
+                        int busId = resultSet.getInt("BusID");
+                        String numberPlate = resultSet.getString("NumberPlate");
+                        int numberOfSeats = resultSet.getInt("NumberOfSeats");
+                        String tripStartTime = resultSet.getString("StartTime");
+                        String tripEndTime = resultSet.getString("EndTime");
+                        double price = resultSet.getDouble("Price");
+
+                        System.out.println("Bus ID: " + busId);
+                        System.out.println("Number Plate: " + numberPlate);
+                        System.out.println("Number of Seats: " + numberOfSeats);
+                        System.out.println("Trip Start Time: " + tripStartTime);
+                        System.out.println("Trip End Time: " + tripEndTime);
+                        System.out.println("Price: $" + price);
+                        System.out.println("-----------------------------------------");
+                    }
+
+                    if (!busesFound) {
+                        System.out.println("No buses available for the selected trip.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+    
+

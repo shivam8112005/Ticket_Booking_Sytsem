@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DatabaseUtil {
-    private static final String URL = "jdbc:mysql://localhost:3306/ticket_booking_system";
+    private static final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
