@@ -52,7 +52,7 @@ public class Ticket {
     // Method to add a ticket to the database
     public void addTicketToDB(int tripID, int bookedBy, int bookedFor, Timestamp bookTime) {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "INSERT INTO Ticket (TripID, BookedBy, BookedFor, BookTime) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, tripID);
