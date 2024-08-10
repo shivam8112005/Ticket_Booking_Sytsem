@@ -67,7 +67,7 @@ public class Passenger {
     // Method to add a passenger to the database
     public void addPassengerToDB(String name, String phoneNumber, String email, Date dob, int discountPassId) {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "INSERT INTO Passenger (PassengerName, PassengerNumber, PassengerEmail, PassengerDOB, DiscountPassID) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, name);
@@ -88,7 +88,7 @@ public class Passenger {
         Passenger passenger = null;
 
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "SELECT * FROM Passenger WHERE PassengerID = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, passengerId);
