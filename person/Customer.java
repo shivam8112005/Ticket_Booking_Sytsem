@@ -71,7 +71,7 @@ public class Customer {
     public void addCustomerToDB(String name, String phoneNumber, String email, String password, Date dob,
             int discountPassId) {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "INSERT INTO Customer (CustomerName, CustomerNumber, CustomerEmail, Password, CustomerDOB, DiscountPassID) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, name);
@@ -93,7 +93,7 @@ public class Customer {
         Customer customer = null;
 
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "SELECT * FROM Customer WHERE CustomerID = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, customerId);
@@ -137,7 +137,6 @@ public class Customer {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
     public Date getDob() {
         return dob;
     }
@@ -178,7 +177,7 @@ public class Customer {
     public static Customer getUserByEmail(String email) throws Exception {
         Customer user = null;
         try (Connection connection = DatabaseUtil.getConnection()) {
-            String query = "SELECT * FROM customer WHERE email = ?";
+            String query = "SELECT * FROM customer WHERE CustomerEmail = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -199,8 +198,9 @@ public class Customer {
         return user;
     }
 
-    private void setId(int int1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setId'");
+    public void setId(int id) {
+        this.id = id;
     }
+
+    
 }
