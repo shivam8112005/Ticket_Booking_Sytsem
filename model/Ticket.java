@@ -72,7 +72,7 @@ public class Ticket {
         Ticket ticket = null;
 
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "username", "password")) {
+                "root", "")) {
             String sql = "SELECT * FROM Ticket WHERE TicketID = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, ticketID);
