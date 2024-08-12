@@ -108,13 +108,13 @@ public class AdminMenu {
 
             switch (choice) {
                 case 1:
-                    DiscountPass.printAllDiscountPass();
+                   // DiscountPass.printAllDiscountPass();
                     break;
                 case 2:
                     new DiscountPass();
                     break;
                 case 3:
-                    DiscountPass.printAllDiscountPass();
+                    //DiscountPass.printAllDiscountPass();
 
                     System.out.print("Enter the Pass ID to delete: ");
                     int deleteId = scanner.nextInt();
@@ -232,7 +232,7 @@ public class AdminMenu {
                     }
                     break;
                 case 4:
-                    Trip.allTrip.add(new Trip());
+                    Trip t=new Trip();
                     break;
                 case 5:
                     System.out.print("Enter start location: ");

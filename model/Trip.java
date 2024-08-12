@@ -35,9 +35,17 @@ public class Trip {
         System.out.print("Enter Start Time (YYYY-MM-DD HH:MM:SS): ");
         this.startTime = Timestamp.valueOf(scanner.nextLine());
 
-        System.out.print("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
-        this.endTime = Timestamp.valueOf(scanner.nextLine());
+        while (true) {
+            System.out.print("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
+            this.endTime = Timestamp.valueOf(scanner.nextLine());
 
+            // Check if end time is after start time
+            if (endTime.after(startTime)) {
+                break; // Valid end time, exit the loop
+            } else {
+                System.out.println("End time must be greater than start time. Please try again.");
+            }
+        }
         System.out.print("Enter Price: ");
         this.price = scanner.nextDouble();
 
