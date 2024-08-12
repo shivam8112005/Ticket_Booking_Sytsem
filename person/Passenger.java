@@ -19,8 +19,6 @@ public class Passenger {
     public Passenger() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter Passenger Details");
-
         System.out.println("Enter Name: ");
         this.name = scanner.nextLine();
 
@@ -33,7 +31,22 @@ public class Passenger {
 
         System.out.println("Enter Email: ");
         this.email = scanner.nextLine();
-
+        String sql="SELECT PassengerEmail FROM passenger WHERE PassengerEmail=?";
+        try {
+            PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(sql);
+            pst.setString(1, this.email);
+            ResultSet rs=pst.executeQuery();
+            while(rs.next()){
+               System.out.println("Email already exists!");
+               this.email=scanner.nextLine();
+               pst.setString(1, this.email);
+                rs=pst.executeQuery();
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         System.out.println("Enter Date of Birth (yyyy-mm-dd): ");
         String dobInput = scanner.nextLine();
         this.dob = java.sql.Date.valueOf(dobInput); // Converting String to Date
@@ -43,6 +56,26 @@ public class Passenger {
 
         // Call the method to add the passenger to the database
         addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId);
+        String query1="SELECT PassengerID FROM passenger WHERE PassengerEmail= ?";
+        PreparedStatement pst;
+        try {
+            pst = DatabaseUtil.getConnection().prepareStatement(query1);
+            pst.setString(1, this.getEmail());
+        ResultSet rs=pst.executeQuery();
+        if(rs.next()){
+            int id=rs.getInt("CustomerID");
+            this.setId(id);
+        }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+
+    private void setId(int id2) {
+        // TODO Auto-generated method stub
+        this.id=id2;
     }
 
     // Parameterized constructor

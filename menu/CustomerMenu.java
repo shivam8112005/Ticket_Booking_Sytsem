@@ -149,7 +149,6 @@ public class CustomerMenu extends Customer{
         }
        }
     }
-  
 
     public static void viewBuses() throws Exception{
         Scanner scanner = new Scanner(System.in);
