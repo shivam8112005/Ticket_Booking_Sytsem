@@ -131,6 +131,7 @@ public class CustomerMenu extends Customer{
         int c=sc.nextInt();
         switch (c) {
             case 1:
+            ul.bookTicket();
                 break;
             case 2:
             viewBuses();
