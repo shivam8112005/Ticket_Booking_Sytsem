@@ -587,4 +587,20 @@ public void bookedTicketHistory() throws Exception{
     System.out.println("Passenger Discount pass ID: "+r.getInt("DiscountPassID "));
    }
 }
+public void upcomingJourneys() throws Exception{
+    String sql="SELECT * from ticket where bookedby=?";
+    PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(sql);
+    pst.setInt(1, this.getID());
+    ResultSet rs=pst.executeQuery();
+    String sql1="SELECT * from trip where TripID=? AND StartTime > NOW()";
+    PreparedStatement pst1=DatabaseUtil.getConnection().prepareStatement(sql1);
+    int i=1;
+    while(rs.next()){
+        pst1.setInt(1,rs.getInt("TripID"));
+        ResultSet rs1=pst1.executeQuery();
+        if(rs1.next()){
+           // System.out.println(i+".  "+);
+        }
+    }
+}
 }
