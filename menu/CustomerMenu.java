@@ -140,6 +140,7 @@ public class CustomerMenu extends Customer{
                 
                 break;  
             case 4:
+            ul.bookedTicketHistory();
                 break;
             case 5:
             
@@ -150,6 +151,7 @@ public class CustomerMenu extends Customer{
         }
        }
     }
+    
 
     public static void viewBuses() throws Exception{
         Scanner scanner = new Scanner(System.in);

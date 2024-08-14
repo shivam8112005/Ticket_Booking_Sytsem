@@ -36,16 +36,8 @@ public class Passenger {
             PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(sql);
             pst.setString(1, this.email);
             ResultSet rs=pst.executeQuery();
-            while(rs.next()){
-               System.out.println("Email already exists!");
-               this.email=scanner.nextLine();
-               pst.setString(1, this.email);
-                rs=pst.executeQuery();
-            }
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+           
+        
         
         System.out.println("Enter Date of Birth (yyyy-mm-dd): ");
         String dobInput = scanner.nextLine();
@@ -55,21 +47,33 @@ public class Passenger {
         this.discountPassId = scanner.nextInt();
 
         // Call the method to add the passenger to the database
-        addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId);
-        String query1="SELECT PassengerID FROM passenger WHERE PassengerEmail= ?";
-        PreparedStatement pst;
-        try {
-            pst = DatabaseUtil.getConnection().prepareStatement(query1);
-            pst.setString(1, this.getEmail());
-        ResultSet rs=pst.executeQuery();
-        if(rs.next()){
-            int id=rs.getInt("CustomerID");
-            this.setId(id);
-        }
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        if(!rs.next()){
+            //    System.out.println("Email already exists!");
+            //    this.email=scanner.nextLine();
+            //    pst.setString(1, this.email);
+            //     rs=pst.executeQuery();
+            addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId);
+            String query1="SELECT PassengerID FROM passenger WHERE PassengerEmail= ?";
+            PreparedStatement pst1;
+            try {
+                pst1 = DatabaseUtil.getConnection().prepareStatement(query1);
+                pst1.setString(1, this.getEmail());
+            ResultSet rs1=pst1.executeQuery();
+            if(rs1.next()){
+                int id=rs1.getInt("CustomerID");
+                this.setId(id);
+            }
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            }
+        
+    }catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+       
         
     }
 

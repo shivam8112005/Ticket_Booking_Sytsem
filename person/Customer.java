@@ -520,6 +520,71 @@ private void updateSeats(Connection connection, int busId, int remainingSeats) t
         statement.executeUpdate();
     }
 }
-
-
+public void bookedTicketHistory() throws Exception{
+    Scanner sc=new Scanner(System.in);
+    String sql="SELECT * from ticket where BookedBy= ?";
+    PreparedStatement pst=DatabaseUtil.getConnection().prepareStatement(sql);
+    pst.setInt(1, this.getID());
+    ResultSet rs=pst.executeQuery();
+    String querry="SELECT * FROM passenger where passengerid=?";
+    PreparedStatement pst1=DatabaseUtil.getConnection().prepareStatement(querry);
+    int i=1;
+    while(rs.next()){
+        pst1.setInt(1, rs.getInt("BookedFor"));
+        ResultSet rs1=pst1.executeQuery();
+       if(rs1.next()){
+        System.out.println(i+".  "+rs1.getString("PassengerName")+"  Passenger ID: "+rs1.getInt("PassengerID")+"  Ticket ID: "+rs.getInt("TicketID"));
+       }
+       i++;
+    }System.out.println(i+".  Return");
+    if(i==1){
+        System.out.println("No Tickets Booked.");
+        return;
+    }
+    System.out.print("Enter Passenger ID to view Ticket Details: ");
+    int ch=sc.nextInt();
+    while(ch<1 || ch>i){
+        System.out.println("Enter valid Passenger Id!");
+        ch=sc.nextInt();
+    }if(ch==i){
+        return;
+    }
+    String sql1="select * from ticket where BookedFor=?";
+    PreparedStatement pst2=DatabaseUtil.getConnection().prepareStatement(sql1);
+    pst2.setInt(1, ch);
+    System.out.println("---------------------------- Ticket Details --------------------------");
+    ResultSet rs2=pst2.executeQuery();
+    String sql2="SELECT * FROM trip where tripID=?";
+    PreparedStatement pst3=DatabaseUtil.getConnection().prepareStatement(sql2);
+    if(rs2.next()){
+        System.out.println("Ticket ID: "+rs2.getInt("TicketID"));
+        System.out.println("Ticket Booking Time: "+rs2.getTimestamp("BookTime"));
+        pst3.setInt(1, rs2.getInt("TripID"));
+        ResultSet rs3=pst3.executeQuery();
+    
+    if(rs3.next()){System.out.println("Ticket Price: "+rs3.getDouble("Price"));
+        System.out.println("------------------------------- trip Details --------------------------");
+       // System.out.println("Trip ID: "+rs3.getInt("TripID"));
+        System.out.println("Trip Start Time: "+rs3.getTimestamp("StartTime"));
+        System.out.println("Trip End Time: "+rs3.getTimestamp("EndTime"));
+        String sql3="select * from route where RouteID=?";
+        PreparedStatement pst4=DatabaseUtil.getConnection().prepareStatement(sql3);
+        pst4.setInt(1, rs3.getInt("RouteID"));
+        ResultSet rs4=pst4.executeQuery();
+        if(rs4.next()){
+            System.out.println("Start Location: "+rs4.getString("StartLocation"));
+            System.out.println("End Location: "+rs4.getString("EndLocation"));
+        }
+    }
+    }System.out.println("------------------------------------ Passenger Details ---------------------------");
+   pst1.setInt(1, ch);
+   ResultSet r=pst1.executeQuery();
+   if(r.next()){
+    System.out.println("Passenger Name: "+r.getString("PassengerName"));
+    System.out.println("Passenger Mobile number: "+r.getString("PassengerNumber"));
+    System.out.println("Passenger Email: "+r.getString("PassengerEmail"));
+    System.out.println("Passenger DOB: "+r.getDate("PassengerDOB"));
+    System.out.println("Passenger Discount pass ID: "+r.getInt("DiscountPassID "));
+   }
+}
 }
