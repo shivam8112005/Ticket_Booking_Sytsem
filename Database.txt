@@ -33,14 +33,14 @@ CREATE TABLE IF NOT EXISTS Trip (
 -- Create the DiscountPass table
 CREATE TABLE IF NOT EXISTS DiscountPass (
     DiscountPassID INT PRIMARY KEY AUTO_INCREMENT,
-    PassName VARCHAR(30) UNIQUE,
+    PassName VARCHAR(30),
     DiscountPercentage FLOAT
 );
 
 -- Create the Passenger table
 CREATE TABLE IF NOT EXISTS Passenger (
     PassengerID INT PRIMARY KEY AUTO_INCREMENT,
-    PassengerName VARCHAR(30),
+    PassengerName VARCHAR(30) UNIQUE,
     PassengerNumber CHAR(10),
     PassengerEmail VARCHAR(20),
     PassengerDOB DATE,
@@ -117,6 +117,8 @@ DELIMITER ;
 
 
 -- Trigger to call the procedure after inserting a new trip
+DELIMITER $$
+
 CREATE TRIGGER after_trip_insert
 AFTER INSERT ON Trip
 FOR EACH ROW
@@ -125,3 +127,4 @@ BEGIN
 END$$
 
 DELIMITER ;
+
