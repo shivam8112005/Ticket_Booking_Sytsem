@@ -543,10 +543,11 @@ public void bookedTicketHistory() throws Exception{
     }
     System.out.print("Enter Ticket ID to view Ticket Details: ");
     int ch=sc.nextInt();
-    while(ch<1 || ch>=i){
-        System.out.println("Enter valid Ticket Id!");
-        ch=sc.nextInt();
-    }if(ch==0){
+    // while(ch<1 || ch>=i){
+    //     System.out.println("Enter valid Ticket Id!");
+    //     ch=sc.nextInt();
+    // }
+    if(ch==0){
         return;
     }
     String sql1="select * from ticket where TicketID=?";
@@ -562,7 +563,7 @@ public void bookedTicketHistory() throws Exception{
         pst3.setInt(1, rs2.getInt("TripID"));
         ResultSet rs3=pst3.executeQuery();
     
-    if(rs3.next()){System.out.println("Ticket Price: "+rs3.getDouble("Price"));
+     if(rs3.next()){System.out.println("Ticket Price: "+rs3.getDouble("Price"));
         System.out.println("------------------------------- trip Details --------------------------");
        // System.out.println("Trip ID: "+rs3.getInt("TripID"));
         System.out.println("Trip Start Time: "+rs3.getTimestamp("StartTime"));
@@ -576,7 +577,11 @@ public void bookedTicketHistory() throws Exception{
             System.out.println("End Location: "+rs4.getString("EndLocation"));
         }
     }
-    }System.out.println("------------------------------------ Passenger Details ---------------------------");
+    }else{
+        System.out.println("Invalid Ticket Id!");
+        return;
+    }
+    System.out.println("------------------------------------ Passenger Details ---------------------------");
    pst1.setInt(1, ch);
    ResultSet r=pst1.executeQuery();
    if(r.next()){
@@ -637,7 +642,7 @@ public void upcomingJourneys() throws Exception{
         pst3.setInt(1, rs2.getInt("TripID"));
         ResultSet rs3=pst3.executeQuery();
     
-    if(rs3.next()){System.out.println("Ticket Price: "+rs3.getDouble("Price"));
+     if(rs3.next()){System.out.println("Ticket Price: "+rs3.getDouble("Price"));
         System.out.println("------------------------------- trip Details --------------------------");
        // System.out.println("Trip ID: "+rs3.getInt("TripID"));
         System.out.println("Trip Start Time: "+rs3.getTimestamp("StartTime"));
@@ -651,7 +656,11 @@ public void upcomingJourneys() throws Exception{
             System.out.println("End Location: "+rs4.getString("EndLocation"));
         }
     }
-    }System.out.println("------------------------------------ Passenger Details ---------------------------");
+    }else{
+        System.out.println("Invalid Ticket ID !");
+        return;
+    }
+    System.out.println("------------------------------------ Passenger Details ---------------------------");
    pst1.setInt(1, ch);
    ResultSet r=pst1.executeQuery();
    if(r.next()){
