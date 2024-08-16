@@ -152,7 +152,10 @@ public class Route {
                 int id = rs.getInt("RouteID");
                 String startLocation = rs.getString("StartLocation");
                 String endLocation = rs.getString("EndLocation");
-                System.out.printf("ID: %d, Start Location: %s, End Location: %s\n", id, startLocation, endLocation);
+                System.out.println("ID: " + id +
+                        ", Start Location: " + startLocation +
+                        ", End Location: " + endLocation);
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,7 +176,7 @@ public class Route {
         Route.printAllRoutes();
     }
 
-    // Getters and setters 
+    // Getters and setters
     public void setStartLocation(String startLocation) {
         this.startLocation = startLocation;
     }
