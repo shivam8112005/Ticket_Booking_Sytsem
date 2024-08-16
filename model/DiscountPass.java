@@ -153,7 +153,8 @@ public class DiscountPass {
                 int id = rs.getInt("DiscountPassID");
                 String name = rs.getString("PassName");
                 float discountPercentage = rs.getFloat("DiscountPercentage");
-                System.out.printf("ID: %d, Name: %s, Discount Percentage: %.2f%%\n", id, name, discountPercentage);
+                System.out.println("ID: " + id + ", Name: " + name + ", Discount Percentage: "
+                        + String.format("%.2f", discountPercentage) + "%");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -175,19 +176,21 @@ public class DiscountPass {
     // for testing purposes
     public static void main(String[] args) {
         DiscountPass dp1 = new DiscountPass();
-        
+
         DiscountPass dp2 = DiscountPass.getDiscountPassFromDB(dp1.getDiscountPassID());
         if (dp2 != null) {
             System.out.println("Retrieved Discount Pass:");
-            System.out.printf("ID: %d, Name: %s, Discount Percentage: %.2f%%\n", dp2.getDiscountPassID(), dp2.getName(),
-            dp2.getDiscountPercentage());
+            System.out.println("ID: " + dp2.getDiscountPassID() +
+                    ", Name: " + dp2.getName() +
+                    ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
         }
-        
+
         dp2.updateNameInDB(dp2.getDiscountPassID(), "NewPassName");
         dp2.updateDiscountPercentageInDB(dp2.getDiscountPassID(), 15.5f);
-        System.out.printf("ID: %d, Name: %s, Discount Percentage: %.2f%%\n", dp2.getDiscountPassID(), dp2.getName(),
-        dp2.getDiscountPercentage());
-        
+        System.out.println("ID: " + dp2.getDiscountPassID() +
+                ", Name: " + dp2.getName() +
+                ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
+
         DiscountPass.printAllDiscountPasses();
         DiscountPass dp3 = new DiscountPass();
         DiscountPass dp4 = new DiscountPass();
