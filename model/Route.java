@@ -1,3 +1,5 @@
+package model;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,7 +18,6 @@ public class Route {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    // No-argument constructor
     public Route() {
         System.out.println("Enter Route Details:");
         System.out.print("Enter start location: ");
@@ -26,7 +27,6 @@ public class Route {
         addRouteToDB(startLocation, endLocation);
     }
 
-    // Parameterized constructor
     public Route(int routeID, String startLocation, String endLocation) {
         this.routeID = routeID;
         this.startLocation = startLocation;
@@ -34,10 +34,8 @@ public class Route {
     }
 
     public Route(int a) {
-        // A constructor that is only to access methods
     }
 
-    // Method to add the route details to the database
     public void addRouteToDB(String startLocation, String endLocation) {
         String query = "INSERT INTO Route (StartLocation, EndLocation) VALUES (?, ?)";
 
@@ -58,7 +56,6 @@ public class Route {
         }
     }
 
-    // Method to retrieve a Route object from the database using the RouteID
     public static Route getRouteFromDB(int routeID) {
         String query = "SELECT * FROM Route WHERE RouteID = ?";
 
@@ -80,6 +77,100 @@ public class Route {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void updateStartLocationInDB(int routeID, String newStartLocation) {
+        String query = "UPDATE Route SET StartLocation = ? WHERE RouteID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, newStartLocation);
+            stmt.setInt(2, routeID);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Route start location updated successfully.");
+                this.startLocation = newStartLocation;
+            } else {
+                System.out.println("No route found with ID: " + routeID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateEndLocationInDB(int routeID, String newEndLocation) {
+        String query = "UPDATE Route SET EndLocation = ? WHERE RouteID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, newEndLocation);
+            stmt.setInt(2, routeID);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Route end location updated successfully.");
+                this.endLocation = newEndLocation;
+            } else {
+                System.out.println("No route found with ID: " + routeID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteRouteFromDB(int routeID) {
+        String query = "DELETE FROM Route WHERE RouteID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, routeID);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Route deleted successfully.");
+            } else {
+                System.out.println("No route found with ID: " + routeID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void printAllRoutes() {
+        String query = "SELECT * FROM Route";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            System.out.println("Routes:");
+            while (rs.next()) {
+                int id = rs.getInt("RouteID");
+                String startLocation = rs.getString("StartLocation");
+                String endLocation = rs.getString("EndLocation");
+                System.out.printf("ID: %d, Start Location: %s, End Location: %s\n", id, startLocation, endLocation);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        Route route1 = new Route();
+        Route route3 = new Route();
+        Route route2 = Route.getRouteFromDB(route1.getRouteID());
+        if (route2 != null) {
+            route2.updateStartLocationInDB(route2.getRouteID(), "New Start Location");
+            route2.updateEndLocationInDB(route2.getRouteID(), "New End Location");
+        }
+
+        Route.printAllRoutes();
+        // route2.deleteRouteFromDB(route2.getRouteID());
+        Route.printAllRoutes();
     }
 
     // Getters and setters (optional, depending on your needs)
