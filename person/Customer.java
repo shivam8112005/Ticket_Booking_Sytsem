@@ -536,17 +536,17 @@ public void bookedTicketHistory() throws Exception{
         System.out.println(i+".  "+rs1.getString("PassengerName")+"  Passenger ID: "+rs1.getInt("PassengerID")+"  Ticket ID: "+rs.getInt("TicketID"));
        }
        i++;
-    }System.out.println(i+".  Return");
+    }System.out.println("0.  Return");
     if(i==1){
         System.out.println("No Tickets Booked.");
         return;
     }
     System.out.print("Enter Ticket ID to view Ticket Details: ");
     int ch=sc.nextInt();
-    while(ch<1 || ch>i){
+    while(ch<1 || ch>=i){
         System.out.println("Enter valid Ticket Id!");
         ch=sc.nextInt();
-    }if(ch==i){
+    }if(ch==0){
         return;
     }
     String sql1="select * from ticket where TicketID=?";
@@ -610,18 +610,18 @@ public void upcomingJourneys() throws Exception{
             }
 
         }
-    }System.out.println(i+". Return");
+    }System.out.println("0. Return");
     if(i==1){
         System.out.println("No UpCominng Journeys.");
         return;
     }
     System.out.print("Enter Ticket ID to view Ticket Details:");
     int ch=sc.nextInt();
-    while(ch<1 || ch>i){
+    while(ch<1 || ch>=i){
         System.out.println("Enter Valid Ticket ID!");
         ch=sc.nextInt();
     }
-    if(ch==i){
+    if(ch==0){
         return;
     }
     String q1="select * from ticket where TicketID=?";
