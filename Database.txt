@@ -7,7 +7,7 @@ USE ticket_booking_db;
 -- Create the Bus table
 CREATE TABLE IF NOT EXISTS Bus (
     BusID INT PRIMARY KEY AUTO_INCREMENT,
-    NumberPlate VARCHAR(10),
+    NumberPlate VARCHAR(15),
     NumberOfSeats INT
 );
 
