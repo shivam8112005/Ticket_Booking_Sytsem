@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS Trip (
 -- Create the DiscountPass table
 CREATE TABLE IF NOT EXISTS DiscountPass (
     DiscountPassID INT PRIMARY KEY AUTO_INCREMENT,
-    PassName VARCHAR(30),
+    PassName VARCHAR(30) UNIQUE,
     DiscountPercentage FLOAT
 );
 
@@ -76,44 +76,45 @@ CREATE TABLE IF NOT EXISTS Ticket (
 DELIMITER $$
 
 -- Procedure to create seats dynamically for a trip
+DELIMITER $$
+
 CREATE PROCEDURE CreateTripSeats(IN trip_id INT)
 BEGIN
     DECLARE bus_id INT;
     DECLARE num_of_seats INT;
-    DECLARE seat_num INT;
+    DECLARE seat_num INT DEFAULT 1;
 
-    -- Get the BusID from the Trip table using the provided trip_id
-    SELECT BusID INTO bus_id FROM Trip WHERE TripID = trip_id;
+    -- Get the BusID and NumberOfSeats from the relevant tables
+    SELECT Trip.BusID, Bus.NumberOfSeats
+    INTO bus_id, num_of_seats
+    FROM Trip
+    JOIN Bus ON Trip.BusID = Bus.BusID
+    WHERE Trip.TripID = trip_id;
 
-    -- Get the number of seats for the bus
-    SELECT NumberOfSeats INTO num_of_seats FROM Bus WHERE BusID = bus_id;
+    -- Create the TripSeat table dynamically
+    SET @create_table_query = CONCAT(
+        'CREATE TABLE IF NOT EXISTS TripSeat_', trip_id, ' (',
+        'SeatNumber INT PRIMARY KEY, ',
+        'TicketID INT NULL, ',
+        'FOREIGN KEY (TicketID) REFERENCES Ticket(TicketID))'
+    );
 
-    -- Construct the query to create the TripSeat_tripid table dynamically
-    SET @query = CONCAT('CREATE TABLE TripSeat_', trip_id, ' (',
-                        'SeatNumber INT PRIMARY KEY, ',
-                        'TicketID INT NULL, ',
-                        'FOREIGN KEY (TicketID) REFERENCES Ticket(TicketID))');
-
-    -- Execute the dynamic query
-    PREPARE stmt FROM @query;
-    EXECUTE stmt;
-    DEALLOCATE PREPARE stmt;
+    PREPARE create_stmt FROM @create_table_query;
+    EXECUTE create_stmt;
+    DEALLOCATE PREPARE create_stmt;
 
     -- Insert seat numbers into the new TripSeat table
-    SET seat_num = 1;
     WHILE seat_num <= num_of_seats DO
         SET @insert_query = CONCAT('INSERT INTO TripSeat_', trip_id, ' (SeatNumber) VALUES (', seat_num, ')');
         PREPARE insert_stmt FROM @insert_query;
         EXECUTE insert_stmt;
         DEALLOCATE PREPARE insert_stmt;
-
         SET seat_num = seat_num + 1;
     END WHILE;
 END$$
 
 DELIMITER ;
 
-DELIMITER $$
 
 -- Trigger to call the procedure after inserting a new trip
 CREATE TRIGGER after_trip_insert
