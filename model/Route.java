@@ -173,7 +173,7 @@ public class Route {
         Route.printAllRoutes();
     }
 
-    // Getters and setters (optional, depending on your needs)
+    // Getters and setters 
     public void setStartLocation(String startLocation) {
         this.startLocation = startLocation;
     }
