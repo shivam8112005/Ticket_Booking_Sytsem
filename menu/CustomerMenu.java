@@ -155,7 +155,6 @@ public class CustomerMenu extends Customer{
 
     public static void viewBuses() throws Exception{
         Scanner scanner = new Scanner(System.in);
-
         System.out.print("Enter Trip Start Time (YYYY-MM-DD HH:MM:SS): ");
         String startTime = scanner.nextLine();
 
