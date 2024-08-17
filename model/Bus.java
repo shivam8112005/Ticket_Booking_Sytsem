@@ -147,7 +147,7 @@ public class Bus {
 
     // Method to print all buses
     public static void printAllBuses() {
-        String query = "SELECT * FROM Bus";
+        String query = "SELECT * FROM AllBus";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
                 PreparedStatement stmt = conn.prepareStatement(query);
