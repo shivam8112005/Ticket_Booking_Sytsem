@@ -14,11 +14,11 @@ public class Bus {
     private String numberPlate;
     private int numberOfSeats;
 
-    private static final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private final String USER = "root";
+    private final String PASSWORD = "";
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     // No-argument constructor
     public Bus() {
@@ -88,7 +88,7 @@ public class Bus {
     }
 
     // Method to retrieve a Bus object from the database using the BusID
-    public static Bus getBusFromDB(int busID) {
+    public Bus getBusFromDB(int busID) {
         String query = "SELECT * FROM Bus WHERE BusID = ?";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -146,7 +146,7 @@ public class Bus {
     }
 
     // Method to print all buses
-    public static void printAllBuses() {
+    public void printAllBuses() {
         String query = "SELECT * FROM AllBus";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -165,7 +165,7 @@ public class Bus {
     }
 
     // Method to delete a bus by ID
-    public static void deleteBusByID(int busID) {
+    public void deleteBusByID(int busID) {
         String query = "DELETE FROM Bus WHERE BusID = ?";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -206,10 +206,10 @@ public class Bus {
     // Main method for testing
     public static void main(String[] args) {
         // Test adding a bus
-        Bus bus1 = new Bus(); // Prompts for input
-        Bus bus2 = new Bus(); // Prompts for input
-        Bus bus3 = new Bus(); // Prompts for input
-        Bus bus4 = new Bus(); // Prompts for input
+        // Bus bus1 = new Bus(); // Prompts for input
+        // Bus bus2 = new Bus(); // Prompts for input
+        // Bus bus3 = new Bus(); // Prompts for input
+        Bus bus4 = new Bus(0); // Prompts for input
 
         // // Test retrieving a bus
         // Bus retrievedBus = Bus.getBusFromDB(bus1.getBusID());
@@ -238,7 +238,7 @@ public class Bus {
 
         // Test printing all buses after deletion
         System.out.println("All buses after deletion:");
-        printAllBuses();
+        bus4.printAllBuses();
     }
 
     // Getters and setters
