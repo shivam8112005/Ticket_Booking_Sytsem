@@ -13,11 +13,11 @@ public class DiscountPass {
     private String name;
     private float discountPercentage;
 
-    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private static String user = "root";
-    private static String password = "";
+    private String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private String user = "root";
+    private String password = "";
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     public DiscountPass() {
         System.out.println("Enter Discount Pass Details:");
@@ -58,7 +58,7 @@ public class DiscountPass {
         }
     }
 
-    public static DiscountPass getDiscountPassFromDB(int discountPassID) {
+    public DiscountPass getDiscountPassFromDB(int discountPassID) {
         String query = "SELECT * FROM DiscountPass WHERE DiscountPassID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -142,7 +142,7 @@ public class DiscountPass {
         }
     }
 
-    public static void printAllDiscountPasses() {
+    public void printAllDiscountPasses() {
         String query = "SELECT * FROM AllDiscountPass";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -162,7 +162,7 @@ public class DiscountPass {
         }
     }
 
-    public static HashSet<Integer> getAllDiscountPassIDs() {
+    public HashSet<Integer> getAllDiscountPassIDs() {
         String query = "SELECT DiscountPassID FROM AllDiscountPassIDs";
         HashSet<Integer> discountPassIDSet = new HashSet<>();
 
@@ -195,30 +195,30 @@ public class DiscountPass {
 
     // for testing purposes
     public static void main(String[] args) {
-        DiscountPass dp1 = new DiscountPass();
+        DiscountPass dp1 = new DiscountPass(0);
 
-        DiscountPass dp2 = DiscountPass.getDiscountPassFromDB(dp1.getDiscountPassID());
-        if (dp2 != null) {
-            System.out.println("Retrieved Discount Pass:");
-            System.out.println("ID: " + dp2.getDiscountPassID() +
-                    ", Name: " + dp2.getName() +
-                    ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
-        }
+        // DiscountPass dp2 = dp1.getDiscountPassFromDB(dp1.getDiscountPassID());
+        // if (dp2 != null) {
+        //     System.out.println("Retrieved Discount Pass:");
+        //     System.out.println("ID: " + dp2.getDiscountPassID() +
+        //             ", Name: " + dp2.getName() +
+        //             ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
+        // }
 
-        dp2.updateNameInDB(dp2.getDiscountPassID(), "NewPassName");
-        dp2.updateDiscountPercentageInDB(dp2.getDiscountPassID(), 15.5f);
-        System.out.println("ID: " + dp2.getDiscountPassID() +
-                ", Name: " + dp2.getName() +
-                ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
+        // dp2.updateNameInDB(dp2.getDiscountPassID(), "NewPassName");
+        // dp2.updateDiscountPercentageInDB(dp2.getDiscountPassID(), 15.5f);
+        // System.out.println("ID: " + dp2.getDiscountPassID() +
+        //         ", Name: " + dp2.getName() +
+        //         ", Discount Percentage: " + String.format("%.2f", dp2.getDiscountPercentage()) + "%");
 
-        DiscountPass.printAllDiscountPasses();
-        DiscountPass dp3 = new DiscountPass();
-        DiscountPass dp4 = new DiscountPass();
-        DiscountPass dp5 = new DiscountPass();
+        dp1.printAllDiscountPasses();
+        // DiscountPass dp3 = new DiscountPass();
+        // DiscountPass dp4 = new DiscountPass();
+        // DiscountPass dp5 = new DiscountPass();
 
         // dp2.deleteDiscountPassFromDB(dp2.getDiscountPassID());
 
-        DiscountPass.printAllDiscountPasses();
+        // dp1.printAllDiscountPasses();
     }
 
 }
