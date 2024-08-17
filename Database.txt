@@ -81,3 +81,8 @@ SELECT BusID FROM Bus;
 -- View to get all RouteID
 CREATE VIEW AllRouteIDs AS 
 SELECT RouteID FROM Route;
+
+-- View to get all DiscountPassID
+CREATE VIEW AllDiscountPassIDs AS 
+SELECT DiscountPassID FROM DiscountPass;
+
