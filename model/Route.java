@@ -13,11 +13,11 @@ public class Route {
     private String startLocation;
     private String endLocation;
 
-    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private static String user = "root";
-    private static String password = "";
+    private String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private String user = "root";
+    private String password = "";
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     public Route() {
         System.out.println("Enter Route Details:");
@@ -57,7 +57,7 @@ public class Route {
         }
     }
 
-    public static Route getRouteFromDB(int routeID) {
+    public Route getRouteFromDB(int routeID) {
         String query = "SELECT * FROM Route WHERE RouteID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -141,7 +141,7 @@ public class Route {
         }
     }
 
-    public static void printAllRoutes() {
+    public void printAllRoutes() {
         String query = "SELECT * FROM AllRoute";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -164,20 +164,20 @@ public class Route {
     }
 
     public static void main(String[] args) {
-        Route route1 = new Route();
+        // Route route1 = new Route();
         Route route3 = new Route();
-        Route route2 = Route.getRouteFromDB(route1.getRouteID());
-        if (route2 != null) {
-            route2.updateStartLocationInDB(route2.getRouteID(), "New Start Location");
-            route2.updateEndLocationInDB(route2.getRouteID(), "New End Location");
-        }
+        // Route route2 = Route.getRouteFromDB(route1.getRouteID());
+        // if (route2 != null) {
+        // route2.updateStartLocationInDB(route2.getRouteID(), "New Start Location");
+        // route2.updateEndLocationInDB(route2.getRouteID(), "New End Location");
+        // }
 
-        Route.printAllRoutes();
+        route3.printAllRoutes();
         // route2.deleteRouteFromDB(route2.getRouteID());
-        Route.printAllRoutes();
+        // route3.printAllRoutes();
     }
 
-    public static HashSet<Integer> getAllRouteIDs() {
+    public HashSet<Integer> getAllRouteIDs() {
         HashSet<Integer> routeIDSet = new HashSet<>();
         String query = "SELECT RouteID FROM AllRouteIDs";
 
