@@ -1,14 +1,39 @@
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+package menu;
+
+import java.sql.*;
+import java.util.HashSet;
 import java.util.Scanner;
+
+import model.Bus;
+import model.DiscountPass;
+import model.Trip;
+import person.Admin;
 
 public class AdminMenu {
     public static void main(String[] args) {
-       
+        AdminMenu menu = new AdminMenu(0);
+        menu.signUpMenu();
     }
+
+    public AdminMenu(Admin admin) {
+        this.currentAdmin = admin;
+    }
+
+    public AdminMenu(int a) {
+        // to only access method
+    }
+
     private Scanner scanner = new Scanner(System.in);
     private Admin currentAdmin;
+
+    private Connection connect() {
+        try {
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database", "username", "password");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public void signUpMenu() {
         boolean exit = false;
@@ -17,7 +42,7 @@ public class AdminMenu {
             System.out.println("Admin Menu:");
             System.out.println("1. Sign Up");
             System.out.println("2. Login");
-            System.out.println("3. Return");
+            System.out.println("3. Return to home page");
 
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
@@ -39,39 +64,51 @@ public class AdminMenu {
     }
 
     public void login() {
-
+        System.out.println();
         System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        String username = scanner.next();
+        scanner.nextLine(); // Consume newline
 
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        if (Admin.allAdmin.containsKey(username) && Admin.allAdmin.get(username).checkPassword(password,currentAdmin)) {
-            System.out.println("Login successful!");
-            this.currentAdmin = Admin.allAdmin.get(username);
-            adminMenu();
-        } else {
-            System.out.println("Invalid username or password.");
+        try (Connection conn = connect()) {
+            String query = "SELECT * FROM Admin WHERE username = ? AND password = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                this.currentAdmin = new Admin(rs.getString("username"), rs.getString("password"));
+                System.out.println("Login successful.");
+                adminMenu();
+            } else {
+                System.out.println("Invalid credentials.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public void adminMenu() {
-
         while (true) {
+            System.out.println();
             System.out.println("Admin Options:");
             System.out.println("1. Discount Pass Options");
             System.out.println("2. Trip Options");
             System.out.println("3. Bus Options");
             System.out.println("4. Profile");
             System.out.println("5. Logout");
-            System.out.println("6. App Statistics");
 
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
+
             switch (choice) {
                 case 1:
                     discountPassMenu();
+                    break;
                 case 2:
                     tripMenu();
                     break;
@@ -84,8 +121,6 @@ public class AdminMenu {
                 case 5:
                     System.out.println("Logged out successfully.");
                     return;
-                case 6:
-                    break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
@@ -94,7 +129,9 @@ public class AdminMenu {
 
     public void discountPassMenu() {
         boolean exit = false;
+        DiscountPass dp = new DiscountPass(0);
         while (!exit) {
+            System.out.println();
             System.out.println("Discount Pass Menu:");
             System.out.println("1. View All Discount Passes");
             System.out.println("2. Add Discount Pass");
@@ -108,75 +145,69 @@ public class AdminMenu {
 
             switch (choice) {
                 case 1:
-                   // DiscountPass.printAllDiscountPass();
+                    dp.printAllDiscountPasses();
                     break;
                 case 2:
                     new DiscountPass();
                     break;
                 case 3:
-                    //DiscountPass.printAllDiscountPass();
+                    dp.printAllDiscountPasses();
+                    HashSet<Integer> hsDelete = dp.getAllDiscountPassIDs();
 
                     System.out.print("Enter the Pass ID to delete: ");
                     int deleteId = scanner.nextInt();
                     scanner.nextLine();
-                    DiscountPass passToRemove = null;
-                    for (DiscountPass pass : DiscountPass.getAllDiscountPass()) {
-                        if (pass.getPassId() == deleteId) {
-                            passToRemove = pass;
-                            break;
-                        }
-                    }
-                    if (passToRemove != null) {
-                        DiscountPass.getAllDiscountPass().remove(passToRemove);
-                        DatabaseUtil.deleteDiscountPass(passToRemove.getPassId());
-                        System.out.println("Discount Pass removed successfully.");
+
+                    if (hsDelete.contains(deleteId)) {
+                        dp.deleteDiscountPassFromDB(deleteId);
+                        System.out.println("Deletion Successful");
                     } else {
-                        System.out.println("Pass ID not found.");
+                        System.out.println("No such ID found!");
                     }
                     break;
                 case 4:
-                    DiscountPass.printAllDiscountPass();
+                    dp.printAllDiscountPasses();
+                    HashSet<Integer> hsUpdate = dp.getAllDiscountPassIDs();
+
                     System.out.print("Enter the Pass ID to alter: ");
                     int alterId = scanner.nextInt();
                     scanner.nextLine();
-                    for (DiscountPass pass : DiscountPass.getAllDiscountPass()) {
-                        if (pass.getPassId() == alterId) {
-                            boolean alterExit = false;
-                            while (!alterExit) {
-                                System.out.println("Pass ID: " + pass.getPassId());
-                                System.out.println("1. Change Pass Name");
-                                System.out.println("2. Change Discount Percentage");
-                                System.out.println("3. Return");
 
-                                System.out.print("Enter your choice: ");
-                                int alterChoice = scanner.nextInt();
-                                scanner.nextLine();
+                    if (hsUpdate.contains(alterId)) {
+                        boolean alterExit = false;
+                        while (!alterExit) {
+                            DiscountPass alterPass = dp.getDiscountPassFromDB(alterId);
+                            System.out.println(alterPass);
+                            System.out.println("1. Change Pass Name");
+                            System.out.println("2. Change Discount Percentage");
+                            System.out.println("3. Return");
 
-                                switch (alterChoice) {
-                                    case 1:
-                                        try {
-                                           boolean b= pass.setPassName(pass);
-                                           if(b){
-                                            DatabaseUtil.alterDiscountPassName(pass.getPassName(), alterId);
-                                           }
-                                        } catch (Exception e) {
-                                            // TODO Auto-generated catch block
-                                            e.printStackTrace();
-                                        }
-                                        break;
-                                    case 2:
-                                        pass.setDiscountPercentage();
-                                        DatabaseUtil.alterDiscountPasspercent(pass.getDiscountPercentage(), alterId);
-                                        break;
-                                    case 3:
-                                        alterExit = true;
-                                        break;
-                                    default:
-                                        System.out.println("Invalid choice. Please try again.");
-                                }
+                            System.out.print("Enter your choice: ");
+                            int alterChoice = scanner.nextInt();
+                            scanner.nextLine();
+
+                            switch (alterChoice) {
+                                case 1:
+
+                                    System.out.print("Enter new name: ");
+                                    dp.updateNameInDB(alterId, scanner.nextLine());
+
+                                    break;
+                                case 2:
+
+                                    System.out.print("Enter new percentage: ");
+                                    dp.updateDiscountPercentageInDB(alterId, scanner.nextFloat());
+
+                                    break;
+                                case 3:
+                                    alterExit = true;
+                                    break;
+                                default:
+                                    System.out.println("Invalid choice. Please try again.");
                             }
-                            break;
                         }
+                    } else {
+                        System.out.println("No such ID found!");
                     }
                     break;
                 case 5:
@@ -190,14 +221,15 @@ public class AdminMenu {
 
     public void tripMenu() {
         boolean exit = false;
+        Trip trip = new Trip(0);
         while (!exit) {
+            System.out.println();
             System.out.println("Trip Menu:");
             System.out.println("1. View All Trips");
-            System.out.println("2. View All Pending Trips");
-            System.out.println("3. View All Ended Trips");
+            System.out.println("2. View All Ongoing Trips");
+            System.out.println("3. View All Upcoming Trips");
             System.out.println("4. Add Trip");
-            System.out.println("5. Add Multiple Trips with Fixed Start and End Location");
-            System.out.println("6. Return");
+            System.out.println("5. Return");
 
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
@@ -205,168 +237,111 @@ public class AdminMenu {
 
             switch (choice) {
                 case 1:
-                    Trip.printAllTrip();
+                    trip.printAllTrips();
                     break;
                 case 2:
-                    LocalDateTime currentTime = LocalDateTime.now(); // Get the current time
-                    for (Trip trip : Trip.getAllTrip()) {
-                        if (trip.getEndTime().isAfter(currentTime)) {
-                            System.out.println("Trip ID: " + trip.getTripId() +
-                                    ", Start Location: " + trip.getStartLocation() +
-                                    ", Start Time: " + trip.getStartTime() +
-                                    ", End Location: " + trip.getEndLocation() +
-                                    ", End Time: " + trip.getEndTime());
-                        }
-                    }
+                    trip.printOngoingTrips();
                     break;
                 case 3:
-                    currentTime = LocalDateTime.now(); // Get the current time
-                    for (Trip trip : Trip.getAllTrip()) {
-                        if (trip.getEndTime().isBefore(currentTime)) {
-                            System.out.println("Trip ID: " + trip.getTripId() +
-                                    ", Start Location: " + trip.getStartLocation() +
-                                    ", Start Time: " + trip.getStartTime() +
-                                    ", End Location: " + trip.getEndLocation() +
-                                    ", End Time: " + trip.getEndTime());
-                        }
-                    }
+                    trip.printUpcomingTrips();
                     break;
                 case 4:
-                    Trip t=new Trip();
+                    new Trip();
                     break;
+
                 case 5:
-                    System.out.print("Enter start location: ");
-                    String startLocation = scanner.nextLine();
-
-                    System.out.print("Enter end location: ");
-                    String endLocation = scanner.nextLine();
-
-                    int numberOfTrips = 0;
-                    while (numberOfTrips <= 0) {
-                        System.out.print("How many trips do you want to enter (must be greater than 0): ");
-                        numberOfTrips = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-                    }
-
-                    List<Trip> newTrips = new ArrayList<>(); // List to hold newly created trips
-
-                    for (int i = 0; i < numberOfTrips; i++) {
-                        System.out.println("Entering details for trip " + (i + 1) + ":");
-
-                        LocalDateTime startTime = Trip.setTime("Enter start time (format: yyyy-MM-dd HH:mm): ");
-                        LocalDateTime endTime = Trip.setTime("Enter end time (format: yyyy-MM-dd HH:mm): ");
-
-                        // Create a new trip with the given details
-                        Trip trip = new Trip(startLocation, startTime, endLocation, endTime);
-                        newTrips.add(trip); // Add the new trip to the list
-                    }
-
-                    // Print only the newly added trips
-                    System.out.println("Newly added trips:");
-                    for (Trip trip : newTrips) {
-                        System.out.println("Trip ID: " + trip.getTripId() +
-                                ", Start Location: " + trip.getStartLocation() +
-                                ", Start Time: " + trip.getStartTime() +
-                                ", End Location: " + trip.getEndLocation() +
-                                ", End Time: " + trip.getEndTime());
-
-                    }
-
-                    break;
-                case 6:
                     exit = true;
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
         }
-
     }
 
     public void busMenu() {
-        while (true) {
+        boolean exit = false;
+        Bus bus = new Bus(0);
+        while (!exit) {
             System.out.println("Bus Menu:");
             System.out.println("1. View All Buses");
             System.out.println("2. Add Bus");
             System.out.println("3. Delete Bus");
-            System.out.println("4. Alter Bus");
+            System.out.println("4. Update Bus");
             System.out.println("5. Return");
 
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();
+            scanner.nextLine(); // Consume newline
 
             switch (choice) {
                 case 1:
-                    Bus.printAllBus();
+                    bus.printAllBuses();
                     break;
                 case 2:
-                System.out.println("Enter Trip Details for Bus: ");
-                Trip t=new Trip();
-                    new Bus(t);
-                    Trip.allTrip.add(t);
+                    new Bus();
                     break;
                 case 3:
-                    Bus.printAllBus();
+                    bus.printAllBuses();
+                    HashSet<Integer> hsDelete = bus.getAllBusIDs();
+
                     System.out.print("Enter the Bus ID to delete: ");
                     int deleteId = scanner.nextInt();
-                    scanner.nextLine();
-                    Bus busToRemove = null;
-                    for (Bus bus : Bus.getAllBus().keySet()) {
-                        if (bus.getBusId() == deleteId) {
-                            busToRemove = bus;
-                            break;
-                        }
-                    }
-                    if (busToRemove != null) {
-                        Bus.getAllBus().remove(busToRemove);
-                        System.out.println("Bus removed successfully.");
+                    scanner.nextLine(); // Consume newline
+
+                    if (hsDelete.contains(deleteId)) {
+                        bus.deleteBusByID(deleteId);
+                        System.out.println("Deletion Successful");
                     } else {
-                        System.out.println("Bus ID not found.");
+                        System.out.println("No such ID found!");
                     }
                     break;
                 case 4:
-                    Bus.printAllBus();
-                    System.out.print("Enter the Bus ID to alter: ");
-                    int alterId = scanner.nextInt();
-                    scanner.nextLine();
-                    for (Bus bus : Bus.getAllBus().keySet()) {
-                        if (bus.getBusId() == alterId) {
-                            boolean alterExit = false;
-                            while (!alterExit) {
-                                System.out.println("Bus ID: " + bus.getBusId());
-                                System.out.println("1. Change Number Plate");
-                                System.out.println("2. Change Route");
-                                System.out.println("3. Change Bus Seats");
-                                System.out.println("4. Return");
+                    bus.printAllBuses();
+                    HashSet<Integer> hsUpdate = bus.getAllBusIDs();
 
-                                System.out.print("Enter your choice: ");
-                                int alterChoice = scanner.nextInt();
-                                scanner.nextLine();
+                    System.out.print("Enter the Bus ID to update: ");
+                    int updateId = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
 
-                                switch (alterChoice) {
-                                    case 1:
-                                        bus.setNumberPlate();
-                                        break;
-                                    case 2:
-                                        bus.setRoute();
-                                        break;
-                                    case 3:
-                                        bus.setBusSeats();
-                                        break;
-                                    case 4:
-                                        alterExit = true;
-                                        break;
-                                    default:
-                                        System.out.println("Invalid choice. Please try again.");
-                                }
+                    if (hsUpdate.contains(updateId)) {
+                        boolean updateExit = false;
+                        while (!updateExit) {
+                            Bus updateBus = bus.getBusFromDB(updateId);
+                            System.out.println(updateBus);
+                            System.out.println("1. Change Bus Number Plate");
+                            System.out.println("2. Change Bus Capacity");
+                            System.out.println("3. Return");
+
+                            System.out.print("Enter your choice: ");
+                            int updateChoice = scanner.nextInt();
+                            scanner.nextLine(); // Consume newline
+
+                            switch (updateChoice) {
+                                case 1:
+
+                                    System.out.print("Enter new Number Plate: ");
+                                    updateBus.updateNumberPlateInDB(updateId, scanner.nextLine());
+
+                                    break;
+                                case 2:
+                                    System.out.print("Enter new Capacity: ");
+                                    updateBus.updateCapacityInDB(updateId, scanner.nextInt());
+
+                                    break;
+                                case 3:
+                                    updateExit = true;
+                                    break;
+                                default:
+                                    System.out.println("Invalid choice. Please try again.");
                             }
-                            break;
                         }
+                    } else {
+                        System.out.println("No such ID found!");
                     }
                     break;
                 case 5:
-                    return;
+                    exit = true;
+                    break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
@@ -374,40 +349,44 @@ public class AdminMenu {
     }
 
     public void changeProfile() {
-
-        while (true) {
-            System.out.println("Profile Options:");
-            System.out.println("1. View Details");
-            System.out.println("2. Change Name");
-            System.out.println("3. Change Password");
-            System.out.println("4. Change Phone Number");
-            System.out.println("5. Return");
-
+        if (currentAdmin == null) {
+            System.out.println("Please login first.");
+            return;
+        }
+    
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Profile Menu:");
+            System.out.println("1. Change Username");
+            System.out.println("2. Change Password");
+            System.out.println("3. Return");
+    
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();
-
+            scanner.nextLine(); // Consume newline
+    
             switch (choice) {
                 case 1:
-                    System.out.println("Admin ID: " + currentAdmin.getAdminId());
-                    System.out.println("Name: " + currentAdmin.getName());
-                    System.out.println("Phone Number: " + currentAdmin.getPhoneNumber());
+                    if (currentAdmin.getAdminId() > 0) {
+                        currentAdmin.updateUsername(currentAdmin.getAdminId());
+                    } else {
+                        System.out.println("Invalid Admin ID.");
+                    }
                     break;
                 case 2:
-                    currentAdmin.setUserName(currentAdmin);
+                    if (currentAdmin.getAdminId() > 0) {
+                        currentAdmin.updatePassword(currentAdmin.getAdminId());
+                    } else {
+                        System.out.println("Invalid Admin ID.");
+                    }
                     break;
                 case 3:
-                    currentAdmin.setPassword(currentAdmin);
+                    exit = true;
                     break;
-                case 4:
-                    currentAdmin.setPhoneNumber(currentAdmin);
-                    break;
-                case 5:
-                    return;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
         }
+    
     }
-
 }
