@@ -142,7 +142,7 @@ public class Route {
     }
 
     public static void printAllRoutes() {
-        String query = "SELECT * FROM Route";
+        String query = "SELECT * FROM AllRoute";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement stmt = conn.prepareStatement(query);
