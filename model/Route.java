@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
+import java.util.HashSet;
 
 public class Route {
     private int routeID;
@@ -174,6 +175,24 @@ public class Route {
         Route.printAllRoutes();
         // route2.deleteRouteFromDB(route2.getRouteID());
         Route.printAllRoutes();
+    }
+
+    public static HashSet<Integer> getAllRouteIDs() {
+        HashSet<Integer> routeIDSet = new HashSet<>();
+        String query = "SELECT RouteID FROM AllRouteIDs";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                routeIDSet.add(rs.getInt("RouteID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return routeIDSet;
     }
 
     // Getters and setters
