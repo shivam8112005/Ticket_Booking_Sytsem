@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
+import java.util.HashSet;
 
 public class DiscountPass {
     private int discountPassID;
@@ -159,6 +160,25 @@ public class DiscountPass {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static HashSet<Integer> getAllDiscountPassIDs() {
+        String query = "SELECT DiscountPassID FROM AllDiscountPassIDs";
+        HashSet<Integer> discountPassIDSet = new HashSet<>();
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int discountPassID = rs.getInt("DiscountPassID");
+                discountPassIDSet.add(discountPassID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return discountPassIDSet;
     }
 
     public int getDiscountPassID() {
