@@ -1,10 +1,18 @@
+package model;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
+
+import com.mysql.cj.exceptions.InvalidConnectionAttributeException;
+
+import java.util.HashSet;
 
 public class Trip {
     private int tripID;
@@ -14,40 +22,33 @@ public class Trip {
     private Timestamp endTime;
     private double price;
 
-    private static String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private static String user = "root";
-    private static String password = "";
+    private String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private String user = "root";
+    private String password = "";
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private final Scanner sc = new Scanner(System.in);
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     // No-argument constructor
     public Trip() {
         System.out.println("Enter Trip Details:");
 
-        System.out.print("Enter Route ID: ");
-        this.routeID = scanner.nextInt();
+        setBusID();
+        setRouteID();
+        this.startTime = promptForTimestamp("Enter Start Time (YYYY-MM-DD HH:MM:SS): ");
 
-        System.out.print("Enter Bus ID: ");
-        this.busID = scanner.nextInt();
-
-        scanner.nextLine(); // consume line
-
-        System.out.print("Enter Start Time (YYYY-MM-DD HH:MM:SS): ");
-        this.startTime = Timestamp.valueOf(scanner.nextLine());
-
+        // Ensure endTime is after startTime
         while (true) {
-            System.out.print("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
-            this.endTime = Timestamp.valueOf(scanner.nextLine());
-
-            // Check if end time is after start time
+            this.endTime = promptForTimestamp("Enter End Time (YYYY-MM-DD HH:MM:SS): ");
             if (endTime.after(startTime)) {
                 break; // Valid end time, exit the loop
             } else {
                 System.out.println("End time must be greater than start time. Please try again.");
             }
         }
+
         System.out.print("Enter Price: ");
-        this.price = scanner.nextDouble();
+        this.price = sc.nextDouble();
 
         addTripToDB(routeID, busID, startTime, endTime, price);
     }
@@ -66,9 +67,46 @@ public class Trip {
         // A constructor that is only to access methods
     }
 
+    public void setBusID() {
+        Bus bus = new Bus(0); // Constructor to only call methods
+        HashSet<Integer> allBusIDSet = bus.getAllBusIDs();
+
+        int busID;
+        while (true) {
+            System.out.println();
+            bus.printAllBuses();
+            System.out.print("Enter Bus ID: ");
+            busID = sc.nextInt();
+            sc.nextLine();
+            if (allBusIDSet.contains(busID)) {
+                this.busID = busID;
+                return;
+            }
+            System.out.println("Invalid busID");
+        }
+    }
+
+    public void setRouteID() {
+        Route route = new Route(0); // Constructor to only call methods
+        HashSet<Integer> allRouteIDSet = route.getAllRouteIDs();
+
+        int routeID;
+        while (true) {
+            System.out.println();
+            route.printAllRoutes();
+            System.out.print("Enter Route ID: ");
+            routeID = sc.nextInt();
+            sc.nextLine();
+            if (allRouteIDSet.contains(routeID)) {
+                this.routeID = routeID;
+                return;
+            }
+            System.out.println("Invalid busID");
+        }
+    }
+
     // Method to add the trip details to the database
     public void addTripToDB(int routeID, int busID, Timestamp startTime, Timestamp endTime, double price) {
-
         String query = "INSERT INTO Trip (RouteID, BusID, StartTime, EndTime, Price) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -85,15 +123,138 @@ public class Trip {
             if (rs.next()) {
                 this.tripID = rs.getInt(1);
                 System.out.println("Trip added with ID: " + this.tripID);
+                createSeatsForTrip(this.tripID, busID); // to create seats
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Method to retrieve a Trip object from the database using the TripID
-    public static Trip getTripFromDB(int tripID) {
+    private void createSeatsForTrip(int tripID, int busID) {
+        String getSeatsQuery = "SELECT NumberOfSeats FROM Bus WHERE BusID = ?";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS TripSeat_" + tripID + " ("
+                + "SeatNumber INT PRIMARY KEY, "
+                + "TicketID INT NULL, "
+                + "FOREIGN KEY (TicketID) REFERENCES Ticket(TicketID))";
+        String insertSeatQuery = "INSERT INTO TripSeat_" + tripID + " (SeatNumber) VALUES (?)";
 
+        try {
+            Connection conn = DriverManager.getConnection(url, user, password);
+            PreparedStatement seatStmt = conn.prepareStatement(getSeatsQuery);
+            PreparedStatement createStmt = conn.prepareStatement(createTableQuery);
+            PreparedStatement insertStmt = conn.prepareStatement(insertSeatQuery);
+
+            // Get the number of seats for the bus
+            seatStmt.setInt(1, busID);
+            ResultSet rs = seatStmt.executeQuery();
+            int numberOfSeats = 0;
+            if (rs.next()) {
+                numberOfSeats = rs.getInt("NumberOfSeats");
+            }
+
+            // Create the TripSeat_<TripID> table
+            createStmt.executeUpdate();
+
+            // Insert seat numbers into the TripSeat_<TripID> table
+            for (int seatNum = 1; seatNum <= numberOfSeats; seatNum++) {
+                insertStmt.setInt(1, seatNum);
+                insertStmt.executeUpdate();
+            }
+
+            System.out.println("Seats created for TripID: " + tripID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // Method to update the routeID
+    public void updateRouteID(int routeID) {
+        String query = "UPDATE Trip SET RouteID = ? WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, routeID);
+            stmt.setInt(2, this.tripID);
+            stmt.executeUpdate();
+            this.routeID = routeID;
+            System.out.println("RouteID updated to " + routeID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to update the busID
+    public void updateBusID(int busID) {
+        String query = "UPDATE Trip SET BusID = ? WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, busID);
+            stmt.setInt(2, this.tripID);
+            stmt.executeUpdate();
+            this.busID = busID;
+            System.out.println("BusID updated to " + busID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to update the startTime
+    public void updateStartTime(Timestamp startTime) {
+        String query = "UPDATE Trip SET StartTime = ? WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setTimestamp(1, startTime);
+            stmt.setInt(2, this.tripID);
+            stmt.executeUpdate();
+            this.startTime = startTime;
+            System.out.println("StartTime updated to " + startTime);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to update the endTime
+    public void updateEndTime(Timestamp endTime) {
+        String query = "UPDATE Trip SET EndTime = ? WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setTimestamp(1, endTime);
+            stmt.setInt(2, this.tripID);
+            stmt.executeUpdate();
+            this.endTime = endTime;
+            System.out.println("EndTime updated to " + endTime);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to update the price
+    public void updatePrice(double price) {
+        String query = "UPDATE Trip SET Price = ? WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setDouble(1, price);
+            stmt.setInt(2, this.tripID);
+            stmt.executeUpdate();
+            this.price = price;
+            System.out.println("Price updated to " + price);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to retrieve a Trip object from the database using the TripID
+    public Trip getTripFromDB(int tripID) {
         String query = "SELECT * FROM Trip WHERE TripID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -121,7 +282,6 @@ public class Trip {
 
     // Method to get the name of the trip (startLocation to endLocation)
     public String getName() {
-
         String query = "SELECT r.StartLocation, r.EndLocation FROM Route r JOIN Trip t ON r.RouteID = t.RouteID WHERE t.TripID = ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
@@ -149,7 +309,153 @@ public class Trip {
         return duration / (1000 * 60); // convert to minutes
     }
 
-    public double getPrice() {
-        return this.price;
+    // Method to print all trips
+    public void printAllTrips() {
+        String query = "SELECT * FROM Trip";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int tripID = rs.getInt("TripID");
+                int routeID = rs.getInt("RouteID");
+                int busID = rs.getInt("BusID");
+                Timestamp startTime = rs.getTimestamp("StartTime");
+                Timestamp endTime = rs.getTimestamp("EndTime");
+                double price = rs.getDouble("Price");
+                System.out.println("ID: " + tripID +
+                        ", RouteID: " + routeID +
+                        ", BusID: " + busID +
+                        ", Start Time: " + startTime +
+                        ", End Time: " + endTime +
+                        ", Price: " + price);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to print all ongoing trips
+    public void printOngoingTrips() {
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        String query = "SELECT * FROM Trip WHERE StartTime <= ? AND EndTime >= ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setTimestamp(1, currentTime);
+            stmt.setTimestamp(2, currentTime);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int tripID = rs.getInt("TripID");
+                int routeID = rs.getInt("RouteID");
+                int busID = rs.getInt("BusID");
+                Timestamp startTime = rs.getTimestamp("StartTime");
+                Timestamp endTime = rs.getTimestamp("EndTime");
+                double price = rs.getDouble("Price");
+                System.out.println("ID: " + tripID +
+                        ", RouteID: " + routeID +
+                        ", BusID: " + busID +
+                        ", Start Time: " + startTime +
+                        ", End Time: " + endTime +
+                        ", Price: " + price);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to print upcoming trips
+    public void printUpcomingTrips() {
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        String query = "SELECT * FROM Trip WHERE StartTime > ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setTimestamp(1, currentTime);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int tripID = rs.getInt("TripID");
+                int routeID = rs.getInt("RouteID");
+                int busID = rs.getInt("BusID");
+                Timestamp startTime = rs.getTimestamp("StartTime");
+                Timestamp endTime = rs.getTimestamp("EndTime");
+                double price = rs.getDouble("Price");
+                System.out.println("ID: " + tripID +
+                        ", RouteID: " + routeID +
+                        ", BusID: " + busID +
+                        ", Start Time: " + startTime +
+                        ", End Time: " + endTime +
+                        ", Price: " + price);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to delete a trip by ID
+    public void deleteTripByID(int tripID) {
+        String query = "DELETE FROM Trip WHERE TripID = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, tripID);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Trip with ID " + tripID + " has been deleted.");
+            } else {
+                System.out.println("No trip found with ID: " + tripID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to prompt for a Timestamp input with validation
+    private Timestamp promptForTimestamp(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine();
+            try {
+                dateFormat.setLenient(false);
+                java.util.Date parsedDate = dateFormat.parse(input);
+                return new Timestamp(parsedDate.getTime());
+            } catch (ParseException e) {
+                System.out.println("Invalid date and time format. Please use YYYY-MM-DD HH:MM:SS format.");
+            }
+        }
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        // Example usage
+        Scanner sc = new Scanner(System.in);
+        Trip trip = new Trip(); // This will prompt for trip details and add to DB
+
+        // Test printing all trips
+        System.out.println("All Trips:");
+        trip.printAllTrips();
+
+        // Test printing ongoing trips
+        System.out.println("\nOngoing Trips:");
+        trip.printOngoingTrips();
+
+        // Test printing upcoming trips
+        System.out.println("\nUpcoming Trips:");
+        trip.printUpcomingTrips();
+
+        // Test deleting a trip by ID
+        System.out.print("\nEnter ID of trip to delete: ");
+        int idToDelete = sc.nextInt();
+        trip.deleteTripByID(idToDelete);
+
+        // Verify deletion
+        System.out.println("\nAll Trips after deletion:");
+        trip.printAllTrips();
     }
 }
