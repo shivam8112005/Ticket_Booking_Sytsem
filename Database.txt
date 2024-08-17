@@ -72,59 +72,12 @@ CREATE TABLE IF NOT EXISTS Ticket (
     FOREIGN KEY (BookedFor) REFERENCES Passenger(PassengerID)
 );
 
---Procedures and Triggers
-DELIMITER $$
+-- Views
 
--- Procedure to create seats dynamically for a trip
-DELIMITER $$
+-- View to get all BusID
+CREATE VIEW AllBusIDs AS 
+SELECT BusID FROM Bus;
 
-CREATE PROCEDURE CreateTripSeats(IN trip_id INT)
-BEGIN
-    DECLARE bus_id INT;
-    DECLARE num_of_seats INT;
-    DECLARE seat_num INT DEFAULT 1;
-
-    -- Get the BusID and NumberOfSeats from the relevant tables
-    SELECT Trip.BusID, Bus.NumberOfSeats
-    INTO bus_id, num_of_seats
-    FROM Trip
-    JOIN Bus ON Trip.BusID = Bus.BusID
-    WHERE Trip.TripID = trip_id;
-
-    -- Create the TripSeat table dynamically
-    SET @create_table_query = CONCAT(
-        'CREATE TABLE IF NOT EXISTS TripSeat_', trip_id, ' (',
-        'SeatNumber INT PRIMARY KEY, ',
-        'TicketID INT NULL, ',
-        'FOREIGN KEY (TicketID) REFERENCES Ticket(TicketID))'
-    );
-
-    PREPARE create_stmt FROM @create_table_query;
-    EXECUTE create_stmt;
-    DEALLOCATE PREPARE create_stmt;
-
-    -- Insert seat numbers into the new TripSeat table
-    WHILE seat_num <= num_of_seats DO
-        SET @insert_query = CONCAT('INSERT INTO TripSeat_', trip_id, ' (SeatNumber) VALUES (', seat_num, ')');
-        PREPARE insert_stmt FROM @insert_query;
-        EXECUTE insert_stmt;
-        DEALLOCATE PREPARE insert_stmt;
-        SET seat_num = seat_num + 1;
-    END WHILE;
-END$$
-
-DELIMITER ;
-
-
--- Trigger to call the procedure after inserting a new trip
-DELIMITER $$
-
-CREATE TRIGGER after_trip_insert
-AFTER INSERT ON Trip
-FOR EACH ROW
-BEGIN
-    CALL CreateTripSeats(NEW.TripID);
-END$$
-
-DELIMITER ;
-
+-- View to get all RouteID
+CREATE VIEW AllRouteIDs AS 
+SELECT RouteID FROM Route;
