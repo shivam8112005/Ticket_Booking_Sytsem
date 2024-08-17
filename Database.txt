@@ -7,7 +7,7 @@ USE ticket_booking_db;
 -- Create the Bus table
 CREATE TABLE IF NOT EXISTS Bus (
     BusID INT PRIMARY KEY AUTO_INCREMENT,
-    NumberPlate VARCHAR(15),
+    NumberPlate VARCHAR(15) UNIQUE,
     NumberOfSeats INT
 );
 
@@ -86,3 +86,14 @@ SELECT RouteID FROM Route;
 CREATE VIEW AllDiscountPassIDs AS 
 SELECT DiscountPassID FROM DiscountPass;
 
+--View to get all Bus
+CREATE VIEW AllBus AS 
+SELECT * FROM Bus;
+
+--View to get all Route
+CREATE VIEW AllRoute AS 
+SELECT * FROM Route;
+
+--View to get all DiscountPass
+CREATE VIEW AllDiscountPass AS 
+SELECT * FROM DiscountPass;
