@@ -2,18 +2,20 @@ package person;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.regex.Pattern;
+import java.util.Scanner;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Scanner;
-import java.util.regex.Pattern;
+
+import menu.AdminMenu;
 
 public class Admin {
     private Scanner scanner = new Scanner(System.in);
 
     private int adminId;
     private String username;
-    private String phoneNumber;
     private String password;
 
     private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
@@ -22,10 +24,11 @@ public class Admin {
 
     public Admin() {
         System.out.print("Enter username: ");
-        this.username = scanner.nextLine();
-        this.phoneNumber = setValidPhoneNumber();
+        this.username = scanner.next();
         this.password = setValidPassword();
-        saveToDB(username, this.phoneNumber, this.password);
+        this.adminId = saveToDB(username, this.password);
+        AdminMenu am = new AdminMenu(this);
+        am.adminMenu();// open menu after u have register
     }
 
     public Admin(int a) {
@@ -36,7 +39,7 @@ public class Admin {
         this.username = username;
         this.password = password;
 
-        String query = "SELECT id, phoneNumber FROM Admin WHERE username = ? AND password = ?";
+        String query = "SELECT id FROM Admin WHERE username = ? AND password = ?";
         try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
                 PreparedStatement pst = connection.prepareStatement(query)) {
 
@@ -46,45 +49,39 @@ public class Admin {
 
             if (rs.next()) {
                 this.adminId = rs.getInt("id");
-                this.phoneNumber = rs.getString("phoneNumber");
-                System.out.println("Login successful.");
+                AdminMenu am = new AdminMenu(this);
+                am.adminMenu(); // open menu after login
             } else {
                 System.out.println("Invalid username or password.");
+                // return to sign-up menu or handle error
             }
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());
         }
     }
 
-    public void saveToDB(String username, String phoneNumber, String password) {
-        String query = "INSERT INTO Admin (username, password, phoneNumber) VALUES (?, ?, ?)";
+    public int saveToDB(String username, String password) {
+        String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
         try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query)) {
+                PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             pst.setString(1, username);
             pst.setString(2, password);
-            pst.setString(3, phoneNumber);
             pst.executeUpdate();
-            System.out.println("Admin added successfully.");
+
+            // Retrieve the generated ID
+            ResultSet generatedKeys = pst.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int Id = generatedKeys.getInt(1);
+                System.out.println("Admin added successfully with ID: " + this.adminId);
+                return Id;
+            } else {
+                System.out.println("Failed to obtain admin ID.");
+                return -1; // using -1 to indicate error
+            }
         } catch (SQLException e) {
             System.out.println("Error adding admin: " + e.getMessage());
-        }
-    }
-
-    public String setValidPhoneNumber() {
-        String phone;
-        while (true) {
-            System.out.print("Enter phone number: ");
-            phone = scanner.nextLine();
-
-            String phonePattern = "^[0-9]{10}$";
-
-            if (Pattern.matches(phonePattern, phone)) {
-                return phone;
-            } else {
-                System.out.println("Invalid phone number!");
-                System.out.println();
-            }
+            return -1; // using -1 to indicate error
         }
     }
 
@@ -108,43 +105,42 @@ public class Admin {
         System.out.print("Enter new username: ");
         String newUsername = scanner.nextLine();
         String query = "UPDATE Admin SET username = ? WHERE id = ?";
+
         try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
                 PreparedStatement pst = connection.prepareStatement(query)) {
 
             pst.setString(1, newUsername);
             pst.setInt(2, id);
-            pst.executeUpdate();
-            System.out.println("Username updated successfully.");
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Username updated successfully.");
+            } else {
+                System.out.println("No record found with ID: " + id);
+            }
+
         } catch (SQLException e) {
             System.out.println("Error updating username: " + e.getMessage());
-        }
-    }
-
-    public void updatePhoneNumber(int id) {
-        String newPhoneNumber = setValidPhoneNumber();
-        String query = "UPDATE Admin SET phoneNumber = ? WHERE id = ?";
-        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query)) {
-
-            pst.setString(1, newPhoneNumber);
-            pst.setInt(2, id);
-            pst.executeUpdate();
-            System.out.println("Phone number updated successfully.");
-        } catch (SQLException e) {
-            System.out.println("Error updating phone number: " + e.getMessage());
         }
     }
 
     public void updatePassword(int id) {
         String newPassword = setValidPassword();
         String query = "UPDATE Admin SET password = ? WHERE id = ?";
+
         try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
                 PreparedStatement pst = connection.prepareStatement(query)) {
 
             pst.setString(1, newPassword);
             pst.setInt(2, id);
-            pst.executeUpdate();
-            System.out.println("Password updated successfully.");
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Password updated successfully.");
+            } else {
+                System.out.println("No record found with ID: " + id);
+            }
+
         } catch (SQLException e) {
             System.out.println("Error updating password: " + e.getMessage());
         }
@@ -158,7 +154,4 @@ public class Admin {
         return username;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
 }
