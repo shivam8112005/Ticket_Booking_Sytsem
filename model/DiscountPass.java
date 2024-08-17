@@ -143,7 +143,7 @@ public class DiscountPass {
     }
 
     public static void printAllDiscountPasses() {
-        String query = "SELECT * FROM DiscountPass";
+        String query = "SELECT * FROM AllDiscountPass";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement stmt = conn.prepareStatement(query);
