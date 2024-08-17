@@ -1,3 +1,5 @@
+package model;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,19 +16,23 @@ public class Ticket {
     private int bookedFor; // PassengerID
     private Timestamp bookTime;
 
+    private String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private String user = "root";
+    private String password = "";
+
+    private final Scanner scanner = new Scanner(System.in);
+
     // No-parameter constructor
     public Ticket() {
-        Scanner scanner = new Scanner(System.in);
-
         System.out.println("Enter Ticket Details");
 
-        System.out.println("Enter Trip ID: ");
+        System.out.print("Enter Trip ID: ");
         this.tripID = scanner.nextInt();
 
-        System.out.println("Enter Customer ID (Booked By): ");
+        System.out.print("Enter Customer ID (Booked By): ");
         this.bookedBy = scanner.nextInt();
 
-        System.out.println("Enter Passenger ID (Booked For): ");
+        System.out.print("Enter Passenger ID (Booked For): ");
         this.bookedFor = scanner.nextInt();
 
         // Capture the current timestamp for bookTime
@@ -51,8 +57,8 @@ public class Ticket {
 
     // Method to add a ticket to the database
     public void addTicketToDB(int tripID, int bookedBy, int bookedFor, Timestamp bookTime) {
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "root", "")) {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
             String sql = "INSERT INTO Ticket (TripID, BookedBy, BookedFor, BookTime) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, tripID);
@@ -71,8 +77,9 @@ public class Ticket {
     public Ticket getTicketFromDB(int ticketID) {
         Ticket ticket = null;
 
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ticket_booking_db",
-                "root", "")) {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+
             String sql = "SELECT * FROM Ticket WHERE TicketID = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, ticketID);
@@ -92,6 +99,84 @@ public class Ticket {
         }
 
         return ticket;
+    }
+
+    // Method to update the 'BookedBy' field in the database
+    public void updateBookedBy(int ticketID, int newBookedBy) {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+            String sql = "UPDATE Ticket SET BookedBy = ? WHERE TicketID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, newBookedBy);
+            preparedStatement.setInt(2, ticketID);
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("BookedBy updated successfully.");
+            } else {
+                System.out.println("Ticket not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to update the 'BookedFor' field in the database
+    public void updateBookedFor(int ticketID, int newBookedFor) {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+            String sql = "UPDATE Ticket SET BookedFor = ? WHERE TicketID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, newBookedFor);
+            preparedStatement.setInt(2, ticketID);
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("BookedFor updated successfully.");
+            } else {
+                System.out.println("Ticket not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Create a new Ticket
+        System.out.println("Creating a new ticket...");
+        Ticket newTicket = new Ticket();
+
+        // Display ticket details
+        System.out.println("New ticket created with ID: " + newTicket.getTicketID());
+
+        // Update BookedBy for the created ticket
+        System.out.println("Enter new Customer ID (Booked By) to update: ");
+        int newBookedBy = scanner.nextInt();
+        newTicket.updateBookedBy(newTicket.getTicketID(), newBookedBy);
+
+        // Update BookedFor for the created ticket
+        System.out.println("Enter new Passenger ID (Booked For) to update: ");
+        int newBookedFor = scanner.nextInt();
+        newTicket.updateBookedFor(newTicket.getTicketID(), newBookedFor);
+
+        // Retrieve and display the updated ticket
+        System.out.println("Retrieving updated ticket...");
+        Ticket updatedTicket = newTicket.getTicketFromDB(newTicket.getTicketID());
+
+        if (updatedTicket != null) {
+            System.out.println("Updated Ticket Details:");
+            System.out.println("Ticket ID: " + updatedTicket.getTicketID());
+            System.out.println("Trip ID: " + updatedTicket.getTripID());
+            System.out.println("Booked By: " + updatedTicket.getBookedBy());
+            System.out.println("Booked For: " + updatedTicket.getBookedFor());
+            System.out.println("Booking Time: " + updatedTicket.getBookTime());
+        } else {
+            System.out.println("Ticket not found.");
+        }
+
+        scanner.close();
     }
 
     // Getters and setters
