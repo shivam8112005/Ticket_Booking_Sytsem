@@ -309,12 +309,12 @@ public class AdminMenu {
                                 case 1:
 
                                     System.out.print("Enter new Number Plate: ");
-                                    updateBus.updateNumberPlateInDB(updateId, scanner.nextLine());
+                                    updateBus.updateNumberPlate(scanner.nextLine());
 
                                     break;
                                 case 2:
                                     System.out.print("Enter new Capacity: ");
-                                    updateBus.updateCapacityInDB(updateId, scanner.nextInt());
+                                    updateBus.updateNumberOfSeats(scanner.nextInt());
 
                                     break;
                                 case 3:
