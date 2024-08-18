@@ -10,8 +10,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
-import com.mysql.cj.exceptions.InvalidConnectionAttributeException;
-
 import java.util.HashSet;
 
 public class Trip {
