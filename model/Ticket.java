@@ -16,9 +16,9 @@ public class Ticket {
     private int bookedFor; // PassengerID
     private Timestamp bookTime;
 
-    private String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private String user = "root";
-    private String password = "";
+    private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private final String user = "root";
+    private final String password = "";
 
     private final Scanner scanner = new Scanner(System.in);
 
@@ -26,13 +26,13 @@ public class Ticket {
     public Ticket() {
         System.out.println("Enter Ticket Details");
 
-        System.out.print("Enter Trip ID: ");
+        System.out.println("Enter Trip ID: ");
         this.tripID = scanner.nextInt();
 
-        System.out.print("Enter Customer ID (Booked By): ");
+        System.out.println("Enter Customer ID (Booked By): ");
         this.bookedBy = scanner.nextInt();
 
-        System.out.print("Enter Passenger ID (Booked For): ");
+        System.out.println("Enter Passenger ID (Booked For): ");
         this.bookedFor = scanner.nextInt();
 
         // Capture the current timestamp for bookTime
@@ -141,6 +141,44 @@ public class Ticket {
         }
     }
 
+    // Getters and setters
+    public int getTicketID() {
+        return ticketID;
+    }
+
+    public int getTripID() {
+        return tripID;
+    }
+
+    public void setTripID(int tripID) {
+        this.tripID = tripID;
+    }
+
+    public int getBookedBy() {
+        return bookedBy;
+    }
+
+    public void setBookedBy(int bookedBy) {
+        this.bookedBy = bookedBy;
+    }
+
+    public int getBookedFor() {
+        return bookedFor;
+    }
+
+    public void setBookedFor(int bookedFor) {
+        this.bookedFor = bookedFor;
+    }
+
+    public Timestamp getBookTime() {
+        return bookTime;
+    }
+
+    public void setBookTime(Timestamp bookTime) {
+        this.bookTime = bookTime;
+    }
+
+    // Main method for testing
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -177,42 +215,5 @@ public class Ticket {
         }
 
         scanner.close();
-    }
-
-    // Getters and setters
-    public int getTicketID() {
-        return ticketID;
-    }
-
-    public int getTripID() {
-        return tripID;
-    }
-
-    public void setTripID(int tripID) {
-        this.tripID = tripID;
-    }
-
-    public int getBookedBy() {
-        return bookedBy;
-    }
-
-    public void setBookedBy(int bookedBy) {
-        this.bookedBy = bookedBy;
-    }
-
-    public int getBookedFor() {
-        return bookedFor;
-    }
-
-    public void setBookedFor(int bookedFor) {
-        this.bookedFor = bookedFor;
-    }
-
-    public Timestamp getBookTime() {
-        return bookTime;
-    }
-
-    public void setBookTime(Timestamp bookTime) {
-        this.bookTime = bookTime;
     }
 }
