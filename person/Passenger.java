@@ -45,7 +45,7 @@ public class Passenger {
 
         System.out.print("Enter Email: ");
         this.email = scanner.nextLine();
-        while (emailSet.contains(this.email)) {
+        while (!isValidEmail(this.email) || emailSet.contains(this.email)) {
             System.out.println("Email already exists. Please re-enter the email:");
             this.email = scanner.nextLine();
         }
@@ -76,14 +76,34 @@ public class Passenger {
         addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId, this.associatedWith);
     }
 
+    private boolean isValidEmail(String email) {
+
+        return !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+
+    }
+
     // Parameterized constructor
     public Passenger(int id, String name, String phoneNumber, String email, Date dob, int discountPassId,
             int associatedWith) {
-                Customer customer = new Customer(0);
+        Scanner scanner = new Scanner(System.in);
+
+        HashSet<String> phoneNumberSet = getAllPhoneNumbers();
+        HashSet<String> emailSet = getAllEmails();
         this.id = id;
         this.name = name;
-        this.phoneNumber = customer.getValidPhoneNumber();
-        this.email = customer.getValidEmail();
+        System.out.print("Enter Phone Number: ");
+        this.phoneNumber = phoneNumber;
+        while (!isValidPhoneNumber(this.phoneNumber) || phoneNumberSet.contains(this.phoneNumber)) {
+            System.out.println("Invalid or duplicate phone number. Please re-enter the phone number:");
+            this.phoneNumber = scanner.nextLine();
+        }
+
+        System.out.print("Enter Email: ");
+        this.email = scanner.nextLine();
+        while (!isValidEmail(this.email) || emailSet.contains(this.email)) {
+            System.out.println("Email already exists. Please re-enter the email:");
+            this.email = scanner.nextLine();
+        }
         this.dob = dob;
         this.discountPassId = discountPassId;
         this.associatedWith = associatedWith;
