@@ -79,10 +79,11 @@ public class Passenger {
     // Parameterized constructor
     public Passenger(int id, String name, String phoneNumber, String email, Date dob, int discountPassId,
             int associatedWith) {
+                Customer customer = new Customer(0);
         this.id = id;
         this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
+        this.phoneNumber = customer.getValidPhoneNumber();
+        this.email = customer.getValidEmail();
         this.dob = dob;
         this.discountPassId = discountPassId;
         this.associatedWith = associatedWith;
