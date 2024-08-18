@@ -1,10 +1,16 @@
 import java.util.Scanner;
+import menu.AdminMenu;
+import menu.CustomerMenu;
 
 public class Main {
 
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        // Start the table cleanup thread
+        TableCleanupTask cleanupTask = new TableCleanupTask();
+        cleanupTask.start();
+
         int choice;
         while (true) {
             System.out.println("Please select an option:");
@@ -16,15 +22,17 @@ public class Main {
             choice = scanner.nextInt();
             switch (choice) {
                 case 1:
-                    // Customer.customerLogIn();
+                    CustomerMenu cm = new CustomerMenu(0);
+                    cm.signUpMenu();
                     break;
                 case 2:
-                    AdminMenu am = new AdminMenu();
-                    am.signUpMenu();
+                    AdminMenu am = new AdminMenu(0);
+                    am.login();
                     break;
                 case 3:
                     System.out.println("Closing the program");
                     System.exit(0);
+                    break;
                 default:
                     System.out.println("Invalid choice, please try again.");
             }
