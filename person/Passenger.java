@@ -46,7 +46,7 @@ public class Passenger {
         System.out.print("Enter Email: ");
         this.email = scanner.nextLine();
         while (!isValidEmail(this.email) || emailSet.contains(this.email)) {
-            System.out.println("Email already exists. Please re-enter the email:");
+            System.out.println("Invalid or duplicate email. Please re-enter the email:");
             this.email = scanner.nextLine();
         }
 
@@ -61,6 +61,7 @@ public class Passenger {
             dp.printAllDiscountPasses();
             System.out.print("Enter Discount Pass ID: ");
             this.discountPassId = scanner.nextInt();
+            scanner.nextLine(); // Consume newline left-over
 
             if (hs.contains(this.discountPassId)) {
                 System.out.println("Discount Pass set!");
@@ -76,34 +77,16 @@ public class Passenger {
         addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId, this.associatedWith);
     }
 
-    private boolean isValidEmail(String email) {
-
-        return !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-
-    }
-
     // Parameterized constructor
     public Passenger(int id, String name, String phoneNumber, String email, Date dob, int discountPassId,
             int associatedWith) {
-        Scanner scanner = new Scanner(System.in);
-
-        HashSet<String> phoneNumberSet = getAllPhoneNumbers();
-        HashSet<String> emailSet = getAllEmails();
         this.id = id;
         this.name = name;
-        System.out.print("Enter Phone Number: ");
-        this.phoneNumber = phoneNumber;
-        while (!isValidPhoneNumber(this.phoneNumber) || phoneNumberSet.contains(this.phoneNumber)) {
-            System.out.println("Invalid or duplicate phone number. Please re-enter the phone number:");
-            this.phoneNumber = scanner.nextLine();
-        }
 
-        System.out.print("Enter Email: ");
-        this.email = scanner.nextLine();
-        while (!isValidEmail(this.email) || emailSet.contains(this.email)) {
-            System.out.println("Email already exists. Please re-enter the email:");
-            this.email = scanner.nextLine();
-        }
+        this.phoneNumber = phoneNumber;
+
+        this.email = email;
+
         this.dob = dob;
         this.discountPassId = discountPassId;
         this.associatedWith = associatedWith;
@@ -116,6 +99,11 @@ public class Passenger {
     // Method to validate the phone number (example validation for 10-digit numbers)
     private boolean isValidPhoneNumber(String phoneNumber) {
         return phoneNumber.matches("\\d{10}");
+    }
+
+    private boolean isValidEmail(String email) {
+        // Basic email validation regex
+        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$");
     }
 
     // Method to add a passenger to the database
@@ -398,36 +386,46 @@ public class Passenger {
         this.associatedWith = associatedWith;
     }
 
-    public static void main(String[] args) {
-        // Test instance creation with customerID
-        Passenger passenger1 = new Passenger(1); // Assuming customerID is 1
-
-        // Test instance retrieval from DB using passengerID
-        Passenger passengerFromDB = passenger1.getPassengerFromDB(passenger1.getID());
-        if (passengerFromDB != null) {
-            System.out.println("Passenger Retrieved: " + passengerFromDB.getName());
-        }
-
-        // Test updating phone number
-        passenger1.updatePhoneNumber(passenger1.getID(), "9876543210");
-
-        // Test updating email
-        passenger1.updateEmail(passenger1.getID(), "newemail@example.com");
-
-        // Test updating name
-        passenger1.updateName(passenger1.getID(), "New Name");
-
-        // Test updating DOB
-        passenger1.updateDob(passenger1.getID(), new Date());
-
-        // Test updating discount pass ID
-        passenger1.updateDiscountPassId(passenger1.getID(), 2);
-
-        // Test retrieving passengers associated with a customerID
-        ArrayList<Passenger> passengers = passenger1.getPassengersByCustomerID(1);
-        System.out.println("Passengers associated with CustomerID 1:");
-        for (Passenger p : passengers) {
-            System.out.println("Passenger Name: " + p.getName() + ", Phone: " + p.getPhoneNumber());
-        }
+    @Override
+    public String toString() {
+        System.out.println();
+        return "Passenger [id=" + id + ", name=" + name + ", phoneNumber=" + phoneNumber + ", email=" + email + ", dob="
+                + dob + ", discountPassId=" + discountPassId + ", associatedWith=" + associatedWith + "]\n";
     }
+
+    // public static void main(String[] args) {
+    // // Test instance creation with customerID
+    // Passenger passenger1 = new Passenger(1); // Assuming customerID is 1
+
+    // // Test instance retrieval from DB using passengerID
+    // Passenger passengerFromDB =
+    // passenger1.getPassengerFromDB(passenger1.getID());
+    // if (passengerFromDB != null) {
+    // System.out.println("Passenger Retrieved: " + passengerFromDB.getName());
+    // }
+
+    // // Test updating phone number
+    // passenger1.updatePhoneNumber(passenger1.getID(), "9876543210");
+
+    // // Test updating email
+    // passenger1.updateEmail(passenger1.getID(), "newemail@example.com");
+
+    // // Test updating name
+    // passenger1.updateName(passenger1.getID(), "New Name");
+
+    // // Test updating DOB
+    // passenger1.updateDob(passenger1.getID(), new Date());
+
+    // // Test updating discount pass ID
+    // passenger1.updateDiscountPassId(passenger1.getID(), 2);
+
+    // // Test retrieving passengers associated with a customerID
+    // ArrayList<Passenger> passengers = passenger1.getPassengersByCustomerID(1);
+    // System.out.println("Passengers associated with CustomerID 1:");
+    // for (Passenger p : passengers) {
+    // System.out.println("Passenger Name: " + p.getName() + ", Phone: " +
+    // p.getPhoneNumber());
+    // }
+    // }
+
 }
