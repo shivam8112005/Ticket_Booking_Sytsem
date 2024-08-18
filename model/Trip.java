@@ -51,6 +51,17 @@ public class Trip {
         addTripToDB(routeID, busID, startTime, endTime, price);
     }
 
+    // Constructor to initialize the Trip object and add it to the database
+    // for testing only
+    public Trip(int routeID, int busID, Timestamp startTime, Timestamp endTime, double price) {
+        this.routeID = routeID;
+        this.busID = busID;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.price = price;
+        addTripToDB(routeID, busID, startTime, endTime, price);
+    }
+
     // Parameterized constructor
     public Trip(int tripID, int routeID, int busID, Timestamp startTime, Timestamp endTime, double price) {
         this.tripID = tripID;
@@ -432,28 +443,33 @@ public class Trip {
     // Main method for testing
     public static void main(String[] args) {
         // Example usage
-        Scanner sc = new Scanner(System.in);
-        Trip trip = new Trip(); // This will prompt for trip details and add to DB
+        // Scanner sc = new Scanner(System.in);
+        // Trip trip = new Trip(); // This will prompt for trip details and add to DB
 
-        // Test printing all trips
-        System.out.println("All Trips:");
-        trip.printAllTrips();
+        // // Test printing all trips
+        // System.out.println("All Trips:");
+        // trip.printAllTrips();
 
-        // Test printing ongoing trips
-        System.out.println("\nOngoing Trips:");
-        trip.printOngoingTrips();
+        // // Test printing ongoing trips
+        // System.out.println("\nOngoing Trips:");
+        // trip.printOngoingTrips();
 
-        // Test printing upcoming trips
-        System.out.println("\nUpcoming Trips:");
-        trip.printUpcomingTrips();
+        // // Test printing upcoming trips
+        // System.out.println("\nUpcoming Trips:");
+        // trip.printUpcomingTrips();
 
-        // Test deleting a trip by ID
-        System.out.print("\nEnter ID of trip to delete: ");
-        int idToDelete = sc.nextInt();
-        trip.deleteTripByID(idToDelete);
+        // // Test deleting a trip by ID
+        // System.out.print("\nEnter ID of trip to delete: ");
+        // int idToDelete = sc.nextInt();
+        // trip.deleteTripByID(idToDelete);
 
-        // Verify deletion
-        System.out.println("\nAll Trips after deletion:");
-        trip.printAllTrips();
+        // // Verify deletion
+        // System.out.println("\nAll Trips after deletion:");
+        // trip.printAllTrips();
+    //    for (int i = 1; i <= 20; i++) {
+    //         Timestamp testStartTime = Timestamp.valueOf("2024-08-18 08:00:00");
+    //         Timestamp testEndTime = Timestamp.valueOf("2024-08-18 12:00:00");
+    //         new Trip(i, i , testStartTime, testEndTime, i * 100.0);
+    //     }
     }
 }
