@@ -209,27 +209,23 @@ public class Bus {
         }
     }
 
-    // Getters and setters
-    public int getBusID() {
-        return busID;
-    }
+    public HashSet<Integer> getAllBusIDs() {
+        String query = "SELECT BusID FROM AllBusIDs";
+        HashSet<Integer> busIDSet = new HashSet<>();
 
-    public String getNumberPlate() {
-        return numberPlate;
-    }
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
 
-    public int getNumberOfSeats() {
-        return numberOfSeats;
-    }
+            while (rs.next()) {
+                int busID = rs.getInt("BusID");
+                busIDSet.add(busID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-    public void updateNumberPlateInDB(int updateId, String nextLine) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateNumberPlateInDB'");
-    }
-
-    public void updateCapacityInDB(int updateId, int nextInt) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateCapacityInDB'");
+        return busIDSet;
     }
 
     // Main method for testing
@@ -268,5 +264,28 @@ public class Bus {
         // Test printing all buses after deletion
         System.out.println("All buses after deletion:");
         bus4.printAllBuses();
+    }
+
+    // Getters and setters
+    public int getBusID() {
+        return busID;
+    }
+
+    public String getNumberPlate() {
+        return numberPlate;
+    }
+
+    public int getNumberOfSeats() {
+        return numberOfSeats;
+    }
+
+    public void updateNumberPlateInDB(int updateId, String nextLine) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateNumberPlateInDB'");
+    }
+
+    public void updateCapacityInDB(int updateId, int nextInt) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateCapacityInDB'");
     }
 }
