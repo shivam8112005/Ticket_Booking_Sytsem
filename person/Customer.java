@@ -358,38 +358,42 @@ public class Customer {
         boolean seatsAvailable = checkSeatAvailability(tableName, seatsToBook);
 
         if (seatsAvailable) {
-            try {
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                String bookTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                Timestamp bookTime = Timestamp.valueOf(bookTimeStr);
-                Passenger ps = new Passenger('a');
+            try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
 
                 // Retrieve and display associated passengers
+                Passenger ps = new Passenger('c');
                 ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
-                // Assuming 'this.id' is the customer ID
+
                 if (passengers.isEmpty()) {
                     System.out.println("No associated passengers found.");
                     return;
                 }
 
+                // Create a HashSet to store valid passenger IDs
+                HashSet<Integer> validPassengerIDs = new HashSet<>();
                 System.out.println("Select a passenger for each ticket:");
                 for (Passenger passenger : passengers) {
-                    System.out.println(
-                            "Passenger ID: " + passenger.getID() + ", Name: " + passenger.getName());
+                    System.out.println("Passenger ID: " + passenger.getID() + ", Name: " + passenger.getName());
+                    validPassengerIDs.add(passenger.getID()); // Add IDs to the HashSet
                 }
 
                 // Book the seats
                 for (int i = 0; i < seatsToBook; i++) {
-                    System.out.print("Enter Passenger ID for ticket " + (i + 1) + ": ");
-                    int selectedPassengerID = scanner.nextInt();
-                    scanner.nextLine(); // Consume the newline
+                    int selectedPassengerID;
+                    while (true) {
+                        System.out.print("Enter Passenger ID for ticket " + (i + 1) + ": ");
+                        selectedPassengerID = scanner.nextInt();
+                        scanner.nextLine(); // Consume the newline
 
-                    // Create a ticket and add it to the database
-                    Ticket ticket = new Ticket(0); 
-                    ticket.addTicketToDB(tripId, this.id, selectedPassengerID, bookTime);
+                        if (validPassengerIDs.contains(selectedPassengerID)) {
+                            break; // Exit loop if ID is valid
+                        } else {
+                            System.out.println("Invalid Passenger ID. Please enter a valid Passenger ID.");
+                        }
+                    }
 
-                    // Get the ticket ID and update seat availability
-                    int ticketId = getLastInsertedTicketId(connection);
+                    // Insert the ticket and get the ticket ID
+                    int ticketId = getLastInsertedTicketId(connection, tripId, selectedPassengerID);
                     updateSeatAvailability(tableName, ticketId);
                 }
             } catch (SQLException e) {
@@ -418,23 +422,51 @@ public class Customer {
 
     private void updateSeatAvailability(String tableName, int ticketId) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "UPDATE " + tableName + " SET TicketID = ? WHERE TicketID IS NULL LIMIT 1";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, ticketId);
-            preparedStatement.executeUpdate();
+            // Step 1: Find the row with NULL TicketID
+            String selectSql = "SELECT SeatNumber FROM " + tableName + " WHERE TicketID IS NULL LIMIT 1";
+
+            int rowId = -1; // Variable to hold the row ID
+
+            try (Statement selectStatement = connection.createStatement();
+                    ResultSet resultSet = selectStatement.executeQuery(selectSql)) {
+                if (resultSet.next()) {
+                    rowId = resultSet.getInt("SeatNumber"); 
+                }
+            }
+
+            if (rowId != -1) {
+                // Step 2: Update the selected row
+                String updateSql = "UPDATE " + tableName + " SET TicketID = ? WHERE SeatNumber = ?";
+                try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                    updateStatement.setInt(1, ticketId);
+                    updateStatement.setInt(2, rowId);
+                    updateStatement.executeUpdate();
+                }
+            } else {
+                System.out.println("No available seats to update.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private int getLastInsertedTicketId(Connection connection) {
+    private int getLastInsertedTicketId(Connection connection, int tripId, int selectedPassengerID) {
         try {
-            String sql = "SELECT LAST_INSERT_ID()";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+            String sql = "INSERT INTO ticket (TripID, BookedBy, BookedFor, BookTime) VALUES (?, ?, ?, NOW())";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setInt(1, tripId);
+                pstmt.setInt(2, this.id);
+                pstmt.setInt(3, selectedPassengerID);
 
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
+                pstmt.executeUpdate();
+
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    } else {
+                        throw new SQLException("Failed to retrieve last inserted ticket ID.");
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -522,7 +554,7 @@ public class Customer {
         }
         System.out.print("Enter Ticket ID to view Ticket Details:");
         int ch = sc.nextInt();
-        while (ch < 1 || ch >= i) {
+        while (ch < 1 || ch >= i) {// this part is causing problems
             System.out.println("Enter Valid Ticket ID!");
             ch = sc.nextInt();
         }
