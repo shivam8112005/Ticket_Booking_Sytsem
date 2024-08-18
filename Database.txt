@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Route (
     EndLocation VARCHAR(50)
 );
 
--- Create the Trip table with the additional Price column
+-- Create the Trip table
 CREATE TABLE IF NOT EXISTS Trip (
     TripID INT PRIMARY KEY AUTO_INCREMENT,
     BusID INT,
@@ -33,31 +33,33 @@ CREATE TABLE IF NOT EXISTS Trip (
 -- Create the DiscountPass table
 CREATE TABLE IF NOT EXISTS DiscountPass (
     DiscountPassID INT PRIMARY KEY AUTO_INCREMENT,
-    PassName VARCHAR(30),
+    PassName VARCHAR(30) UNIQUE,
     DiscountPercentage FLOAT
-);
-
--- Create the Passenger table
-CREATE TABLE IF NOT EXISTS Passenger (
-    PassengerID INT PRIMARY KEY AUTO_INCREMENT,
-    PassengerName VARCHAR(30) UNIQUE,
-    PassengerNumber CHAR(10),
-    PassengerEmail VARCHAR(20),
-    PassengerDOB DATE,
-    DiscountPassID INT,
-    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID)
 );
 
 -- Create the Customer table
 CREATE TABLE IF NOT EXISTS Customer (
     CustomerID INT PRIMARY KEY AUTO_INCREMENT,
     CustomerName VARCHAR(30),
-    CustomerNumber CHAR(10),
-    CustomerEmail VARCHAR(20),
+    CustomerNumber CHAR(10) UNIQUE,
+    CustomerEmail VARCHAR(20) UNIQUE,
     CustomerDOB DATE,
     Password VARCHAR(15),
     DiscountPassID INT,
     FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID)
+);
+
+-- Create the Passenger table
+CREATE TABLE IF NOT EXISTS Passenger (
+    PassengerID INT PRIMARY KEY AUTO_INCREMENT,
+    PassengerName VARCHAR(30),
+    PassengerNumber CHAR(10) UNIQUE,
+    PassengerEmail VARCHAR(20) UNIQUE,
+    PassengerDOB DATE,
+    DiscountPassID INT,
+    AssociatedWith INT,
+    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID),
+    FOREIGN KEY (AssociatedWith) REFERENCES Customer(CustomerID)
 );
 
 -- Create the Ticket table
@@ -71,6 +73,16 @@ CREATE TABLE IF NOT EXISTS Ticket (
     FOREIGN KEY (BookedBy) REFERENCES Customer(CustomerID),
     FOREIGN KEY (BookedFor) REFERENCES Passenger(PassengerID)
 );
+
+-- Create table Admin
+CREATE TABLE IF NOT EXISTS Admin (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL
+);
+-- Insert base user root
+INSERT INTO Admin (username, password) VALUES ('root', '(7f*H7jTek6f7($Z');
+
 
 -- Views
 
@@ -97,3 +109,4 @@ SELECT * FROM Route;
 --View to get all DiscountPass
 CREATE VIEW AllDiscountPass AS 
 SELECT * FROM DiscountPass;
+
