@@ -376,10 +376,13 @@ public class Trip {
         }
     }
 
-    // Method to print upcoming trips
     public void printUpcomingTrips() {
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-        String query = "SELECT * FROM Trip WHERE StartTime > ?";
+        String query = "SELECT t.TripID, t.RouteID, t.BusID, t.StartTime, t.EndTime, t.Price, " +
+                "r.StartLocation, r.EndLocation " +
+                "FROM Trip t " +
+                "JOIN Route r ON t.RouteID = r.RouteID " +
+                "WHERE t.StartTime > ?";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -394,12 +397,17 @@ public class Trip {
                 Timestamp startTime = rs.getTimestamp("StartTime");
                 Timestamp endTime = rs.getTimestamp("EndTime");
                 double price = rs.getDouble("Price");
+                String startLocation = rs.getString("StartLocation");
+                String endLocation = rs.getString("EndLocation");
+
                 System.out.println("ID: " + tripID +
                         ", RouteID: " + routeID +
                         ", BusID: " + busID +
                         ", Start Time: " + startTime +
                         ", End Time: " + endTime +
-                        ", Price: " + price);
+                        ", Price: " + price +
+                        ", Start Location: " + startLocation +
+                        ", End Location: " + endLocation);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -466,10 +474,10 @@ public class Trip {
         // // Verify deletion
         // System.out.println("\nAll Trips after deletion:");
         // trip.printAllTrips();
-    //    for (int i = 1; i <= 20; i++) {
-    //         Timestamp testStartTime = Timestamp.valueOf("2024-08-18 08:00:00");
-    //         Timestamp testEndTime = Timestamp.valueOf("2024-08-18 12:00:00");
-    //         new Trip(i, i , testStartTime, testEndTime, i * 100.0);
-    //     }
+        // for (int i = 1; i <= 20; i++) {
+        // Timestamp testStartTime = Timestamp.valueOf("2024-08-18 08:00:00");
+        // Timestamp testEndTime = Timestamp.valueOf("2024-08-18 12:00:00");
+        // new Trip(i, i , testStartTime, testEndTime, i * 100.0);
+        // }
     }
 }
