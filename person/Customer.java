@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-
+import java.util.regex.Pattern;
 import java.sql.Statement;
 
 import model.DiscountPass;
@@ -129,25 +129,19 @@ public class Customer {
         return email;
     }
 
-    private String getValidPassword() {
+    public String getValidPassword() {
         Scanner scanner = new Scanner(System.in);
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
         String pass;
-
-        // Define a regex pattern for a valid password
-        // Example: At least 8 characters, with at least one uppercase letter, one
-        // lowercase letter, one digit, and one special character
-        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$";
-
         while (true) {
-            System.out.print("Enter Password: ");
+            System.out.print("Enter password: ");
             pass = scanner.nextLine();
-
-            // Check if the password matches the regex pattern
-            if (pass.matches(regex)) {
-                return pass; // Password is valid, return it
+            if (Pattern.matches(regex, pass)) {
+                return pass;
             } else {
                 System.out.println(
-                        "Invalid password. Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character.");
+                        "Password must be at least 8 characters long, contain at least 1 digit, 1 lowercase letter, and 1 uppercase letter.");
+                System.out.println();
             }
         }
     }
@@ -358,6 +352,7 @@ public class Customer {
         // Step 2: Ask for number of seats to book
         System.out.print("Enter the number of seats to book: ");
         int seatsToBook = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline
 
         // Check availability
         boolean seatsAvailable = checkSeatAvailability(tableName, seatsToBook);
@@ -367,12 +362,31 @@ public class Customer {
                 Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
                 String bookTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 Timestamp bookTime = Timestamp.valueOf(bookTimeStr);
+                Passenger ps = new Passenger('a');
+
+                // Retrieve and display associated passengers
+                ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
+                // Assuming 'this.id' is the customer ID
+                if (passengers.isEmpty()) {
+                    System.out.println("No associated passengers found.");
+                    return;
+                }
+
+                System.out.println("Select a passenger for each ticket:");
+                for (Passenger passenger : passengers) {
+                    System.out.println(
+                            "Passenger ID: " + passenger.getID() + ", Name: " + passenger.getName());
+                }
 
                 // Book the seats
                 for (int i = 0; i < seatsToBook; i++) {
+                    System.out.print("Enter Passenger ID for ticket " + (i + 1) + ": ");
+                    int selectedPassengerID = scanner.nextInt();
+                    scanner.nextLine(); // Consume the newline
+
                     // Create a ticket and add it to the database
-                    Ticket ticket = new Ticket(); // Assuming this constructor is used only to access methods
-                    ticket.addTicketToDB(tripId, 1, 1, bookTime); // Example IDs for bookedBy and bookedFor
+                    Ticket ticket = new Ticket(0); 
+                    ticket.addTicketToDB(tripId, this.id, selectedPassengerID, bookTime);
 
                     // Get the ticket ID and update seat availability
                     int ticketId = getLastInsertedTicketId(connection);
