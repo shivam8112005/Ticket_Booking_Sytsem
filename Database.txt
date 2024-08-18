@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS DiscountPass (
     DiscountPercentage FLOAT
 );
 
+
+
 -- Create the Customer table
 CREATE TABLE IF NOT EXISTS Customer (
     CustomerID INT PRIMARY KEY AUTO_INCREMENT,
@@ -98,6 +100,20 @@ SELECT RouteID FROM Route;
 CREATE VIEW AllDiscountPassIDs AS 
 SELECT DiscountPassID FROM DiscountPass;
 
+-- Trigger
+DELIMITER $$
+
+CREATE TRIGGER after_customer_insert
+AFTER INSERT ON Customer
+FOR EACH ROW
+BEGIN
+    INSERT INTO Passenger (PassengerName, PassengerNumber, PassengerEmail, PassengerDOB, DiscountPassID, AssociatedWith)
+    VALUES (NEW.CustomerName, NEW.CustomerNumber, NEW.CustomerEmail, NEW.CustomerDOB, NEW.DiscountPassID, NEW.CustomerID);
+END$$
+
+DELIMITER ;
+-- As all customers are passengers
+
 -- View to get all Bus
 CREATE VIEW AllBus AS 
 SELECT * FROM Bus;
@@ -114,6 +130,7 @@ SELECT * FROM DiscountPass;
 
 INSERT INTO DiscountPass (PassName, DiscountPercentage)
 VALUES
+  ('No Pass', 0.0),
   ('Womens Pass', 10.0),
   ('Veteran Pass', 20.0),
   ('Army Pass', 15.0),
@@ -133,7 +150,7 @@ VALUES
   ('Night Owl Pass', 15.0),
   ('Seasonal Pass', 20.0),
   ('Holiday Pass', 25.0),
-  ('Special Occasion Pass', 12.0);
+  ('Special Occasion Pass', 12.0),
   ('Student Family Pass', 18.0),
   ('Senior Couple Pass', 22.0),
   ('Military Family Pass', 25.0),
@@ -161,7 +178,7 @@ VALUES
   ('HP17EF4567', 45),
   ('PB18GH7890', 60),
   ('CH19IJ1234', 55),
-  ('AR20KL4567', 40);
+  ('AR20KL4567', 40),
   ('MH22YZ5678', 48),
   ('GJ23AB1234', 52),
   ('DL24CD4567', 45),
@@ -189,92 +206,77 @@ VALUES
   ('Udaipur', 'Jodhpur'),
   ('Varanasi', 'Allahabad'),
   ('Mysore', 'Bangalore'),
-  ('Amritsar', 'Chandigarh');
+  ('Amritsar', 'Chandigarh'),
   ('Mumbai', 'Pune'),
   ('Bangalore', 'Hyderabad'),
   ('Kolkata', 'Chennai'),
   ('Delhi', 'Jaipur'),
   ('Ahmedabad', 'Indore');
 
-  INSERT INTO Trip (BusID, RouteID, StartTime, Price)
+  INSERT INTO Customer (CustomerName, CustomerNumber, CustomerEmail, CustomerDOB, Password, DiscountPassID)
 VALUES
-  (3, 1, '2023-11-15 10:00:00', 1200.00),
-  (2, 2, '2023-12-02 12:30:00', 950.00),
-  (3, 3, '2024-01-18 14:15:00', 1500.00),
-  (4, 4, '2024-02-05 08:45:00', 800.00),
-  (5, 5, '2024-03-12 11:00:00', 1100.00),
-  (6, 6, '2024-04-19 13:30:00', 900.00),
-  (7, 7, '2024-05-26 15:15:00', 1300.00),
-  (8, 8, '2024-06-13 09:45:00', 750.00),
-  (9, 9, '2024-07-20 12:00:00', 1250.00),
-  (10, 10, '2024-08-27 14:30:00', 1000.00),
-  (11, 11, '2023-12-25 16:15:00', 1400.00),
-  (12, 12, '2024-01-01 08:45:00', 850.00),
-  (13, 13, '2024-01-15 11:00:00', 1350.00),
-  (14, 14, '2024-02-29 13:30:00', 700.00),
-  (15, 15, '2024-03-15 15:15:00', 1200.00),
-  (16, 16, '2024-04-22 09:45:00', 950.00),
-  (17, 17, '2024-05-29 12:00:00', 1500.00),
-  (18, 18, '2024-06-15 14:30:00', 800.00),
-  (19, 19, '2024-07-22 16:15:00', 1100.00),
-  (20, 20, '2024-08-29 08:45:00', 900.00);  
-  (2, 1, '2023-11-16 12:00:00', 1250.00),
-  (3, 2, '2023-11-16 14:30:00', 980.00),
-  (4, 3, '2023-11-16 16:15:00', 1550.00),
-  (5, 4, '2023-11-16 09:45:00', 820.00),
-  (6, 5, '2023-11-16 11:30:00', 1150.00),
-  (7, 6, '2023-11-16 14:00:00', 920.00),
-  (8, 7, '2023-11-16 15:45:00', 1350.00),
-  (9, 8, '2023-11-16 10:15:00', 780.00),
-  (10, 9, '2023-11-16 12:30:00', 1280.00),
-  (11, 10, '2023-11-16 14:45:00', 1020.00),
-  (12, 11, '2023-11-16 16:30:00', 1450.00),
-  (13, 12, '2023-11-16 09:00:00', 880.00),
-  (14, 13, '2023-11-16 11:15:00', 1380.00),
-  (15, 14, '2023-11-16 13:45:00', 720.00),
-  (16, 15, '2023-11-16 15:30:00', 1220.00),
-  (17, 16, '2023-11-16 10:15:00', 980.00),
-  (18, 17, '2023-11-16 12:30:00', 1550.00),
-  (19, 18, '2023-11-16 14:45:00', 820.00),
-  (20, 19, '2023-11-16 16:30:00', 1150.00),
-  (21, 20, '2023-11-16 09:00:00', 920.00);
-  (2, 1, '2025-02-18 12:00:00', 1250.00),
-  (3, 2, '2025-02-18 14:30:00', 980.00),
-  (4, 3, '2025-02-18 16:15:00', 1550.00),
-  (5, 4, '2025-02-18 09:45:00', 820.00),
-  (6, 5, '2025-02-18 11:30:00', 1150.00),
-  (7, 6, '2025-02-18 14:00:00', 920.00),
-  (8, 7, '2025-02-18 15:45:00', 1350.00),
-  (9, 8, '2025-02-18 10:15:00', 780.00),
-  (10, 9, '2025-02-18 12:30:00', 1280.00),
-  (11, 10, '2025-02-18 14:45:00', 1020.00),
-  (12, 11, '2025-02-18 16:30:00', 1450.00),
-  (13, 12, '2025-02-18 09:00:00', 880.00),
-  (14, 13, '2025-02-18 11:15:00', 1380.00),
-  (15, 14, '2025-02-18 13:45:00', 720.00),
-  (16, 15, '2025-02-18 15:30:00', 1220.00),
-  (17, 16, '2025-02-18 10:15:00', 980.00),
-  (18, 17, '2025-02-18 12:30:00', 1550.00),
-  (19, 18, '2025-02-18 14:45:00', 820.00),
-  (20, 19, '2025-02-18 16:30:00', 1150.00),
-  (21, 20, '2025-02-18 09:00:00', 920.00);
-  (2, 1, '2024-07-28 12:00:00', 1250.00),
-  (3, 2, '2024-07-29 14:30:00', 980.00),
-  (4, 3, '2024-07-30 16:15:00', 1550.00),
-  (5, 4, '2024-07-31 09:45:00', 820.00),
-  (6, 5, '2024-08-01 11:30:00', 1150.00),
-  (7, 6, '2024-08-02 14:00:00', 920.00),
-  (8, 7, '2024-08-03 15:45:00', 1350.00),
-  (9, 8, '2024-08-04 10:15:00', 780.00),
-  (10, 9, '2024-08-05 12:30:00', 1280.00),
-  (11, 10, '2024-08-06 14:45:00', 1020.00),
-  (12, 11, '2024-08-07 16:30:00', 1450.00),
-  (13, 12, '2024-08-08 09:00:00', 880.00),
-  (14, 13, '2024-08-09 11:15:00', 1380.00),
-  (15, 14, '2024-08-10 13:45:00', 720.00),
-  (16, 15, '2024-08-11 15:30:00', 1220.00),
-  (17, 16, '2024-08-12 10:15:00', 980.00),
-  (18, 17, '2024-08-13 12:30:00', 1550.00),
-  (19, 18, '2024-08-14 14:45:00', 820.00),
-  (20, 19, '2024-08-15 16:30:00', 1150.00),
-  (21, 20, '2024-08-16 09:00:00', 920.00);
+    ('Olivia Martinez', '9876543211', 'oliviam@example.com', '1995-11-23', 'password123', 5),
+    ('Ethan Brown', '1234567891', 'ethanb@example.com', '1988-04-15', 'password456', 2),
+    ('Sophia Lee', '7894561231', 'sophial@example.com', '1992-07-08', 'password789', 1),
+    ('Noah Davis', '3456789013', 'noahd@example.com', '1991-02-21', 'password101', 10),
+    ('Ava Miller', '5678901235', 'avam@example.com', '1993-09-12', 'password111', 15),
+    ('William Johnson', '9012345679', 'williamj@example.com', '1987-03-25', 'password122', 8),
+    ('Mia Carter', '2345678902', 'miac@example.com', '1994-06-18', 'password133', 3),
+    ('James Smith', '6789012346', 'jamess@example.com', '1989-11-11', 'password144', 12),
+    ('Evelyn Anderson', '8901234568', 'evelyn@example.com', '1990-05-04', 'password155', 18),
+    ('Benjamin Wilson', '1234567892', 'benjaminw@example.com', '1992-08-20', 'password166', 6),
+    ('Charlotte Thompson', '9876543212', 'charlottet@example.com', '1986-02-13', 'password177', 1),
+    ('Oliver White', '4567891232', 'oliverw@example.com', '1993-10-07', 'password188', 13),
+    ('Abigail Brown', '7894561233', 'abigailb@example.com', '1988-03-28', 'password199', 4),
+    ('Lucas Davis', '3456789014', 'lucasd@example.com', '1991-11-15', 'password200', 11),
+    ('Emily Miller', '5678901236', 'emilym@example.com', '1994-04-09', 'password211', 16),
+    ('Logan Johnson', '9012345670', 'loganj@example.com', '1987-07-22', 'password222', 9),
+    ('Grace Carter', '2345678903', 'gracec@example.com', '1995-01-16', 'password233', 7),
+    ('Henry Smith', '6789012347', 'henrys@example.com', '1990-09-05', 'password244', 14),
+    ('Amelia Anderson', '8901234569', 'amelia@example.com', '1991-02-28', 'password255', 19),
+    ('Ethan Wilson', '1234567893', 'ethanw@example.com', '1993-11-13', 'password266', 20);
+
+
+    INSERT INTO Passenger (PassengerName, PassengerNumber, PassengerEmail, PassengerDOB, DiscountPassID, AssociatedWith) VALUES
+('John Doe', '1234667890', 'john.doe@passengers.com', '1990-01-01', 1, 1),
+('Jane Smith', '9876548211', 'jane.smith@passengers.com', '1992-02-02', 2, 2),
+('Michael Johnson', '1357944681', 'michael.johnson@passengers.com', '1988-03-03', 3, 3),
+('Emily Brown', '2468077572', 'emily.brown@passengers.com', '1995-04-04', 3, 4),
+('David Lee', '5678901735', 'david.lee@passengers.com', '1985-05-05', 1, 5),
+('Olivia Miller', '4371098766', 'olivia.miller@passengers.com', '1998-06-06', 2, 6),
+('William Taylor', '7890723457', 'william.taylor@passengers.com', '1982-07-07', 3, 7),
+('Sophia Anderson', '3579746812', 'sophia.anderson@passengers.com', '2000-08-08', 1, 8),
+('James Wilson', '6105273848', 'james.wilson@passengers.com', '1979-09-09', 2, 9),
+('Ava White', '924683973', 'ava.white@passengers.com', '2002-10-10', 3, 10),
+('Benjamin Hall', '7472583692', 'benjamin.hall@passengers.com', '1986-11-11', 1, 11),
+('Charlotte Clark', '8569014726', 'charlotte.clark@passengers.com', '1999-12-12', 2, 12),
+('Thomas Harris', '2585690148', 'thomas.harris@passengers.com', '1983-01-13', 3, 13),
+('Amelia Jones', '9014525837', 'amelia.jones@passengers.com', '2001-02-14', 1, 14),
+('Ethan Carter', '4725536903', 'ethan.carter@passengers.com', '1978-03-15', 2, 15),
+('Grace Miller', '2583590149', 'grace.miller@passengers.com', '2003-04-16', 3, 16),
+('Noah Davis', '8369015727', 'noah.davis@passengers.com', '1985-05-17', 1, 17),
+('Mia Rodriguez', '1475583694', 'mia.rodriguez@passengers.com', '1997-06-18', 2, 18),
+('Oliver Martinez', '5536901473', 'oliver.martinez@passengers.com', '1981-07-19', 3, 19),
+('Lily Hernandez', '3650147259', 'lily.hernandez@passengers.com', '2000-08-20', 1, 20);
+
+
+INSERT INTO Admin (username, password) VALUES
+('SystemAdmin', 'securePass123'),
+('NetworkMaster', 'adminSecure456'),
+('DatabaseGuardian', 'passwordMaster789'),
+('AppController', 'secureAppAccess'),
+('ServerSupervisor', 'superSecurePass'),
+('SecurityOfficer', 'adminSecurity123'),
+('DataAnalystLead', 'dataSecure456'),
+('CloudEngineer', 'cloudPass789'),
+('ITManager', 'itAdmin123'),
+('DevOpsLead', 'devOpsSecure456'),
+('SystemArchitect', 'architectPass789'),
+('NetworkSpecialist', 'networkAdmin123'),
+('DatabaseExpert', 'dbExpertSecure456'),
+('AppDeveloper', 'appDevPass789'),
+('ServerTechnician', 'serverTech123'),
+('SecurityAnalyst', 'securityAnalyst456'),
+('DataScientist', 'dataScientistPass789'),
+('CloudArchitect', 'cloudArch123'),
+('ITSupportLead', 'itSupportSecure456');
