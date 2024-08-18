@@ -1,6 +1,5 @@
 package menu;
 
-import java.sql.*;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -10,10 +9,10 @@ import model.Trip;
 import person.Admin;
 
 public class AdminMenu {
-    public static void main(String[] args) {
-        AdminMenu menu = new AdminMenu(0);
-        menu.signUpMenu();
-    }
+    // public static void main(String[] args) {
+    // AdminMenu menu = new AdminMenu(0);
+    // menu.login();
+    // }
 
     public AdminMenu(Admin admin) {
         this.currentAdmin = admin;
@@ -26,42 +25,33 @@ public class AdminMenu {
     private Scanner scanner = new Scanner(System.in);
     private Admin currentAdmin;
 
-    private Connection connect() {
-        try {
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database", "username", "password");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+    // public void signUpMenu() {
+    // boolean exit = false;
 
-    public void signUpMenu() {
-        boolean exit = false;
+    // while (!exit) {
+    // System.out.println("Admin Menu:");
+    // System.out.println("1. Sign Up");
+    // System.out.println("2. Login");
+    // System.out.println("3. Return to home page");
 
-        while (!exit) {
-            System.out.println("Admin Menu:");
-            System.out.println("1. Sign Up");
-            System.out.println("2. Login");
-            System.out.println("3. Return to home page");
+    // System.out.print("Enter your choice: ");
+    // int choice = scanner.nextInt();
 
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-
-            switch (choice) {
-                case 1:
-                    this.currentAdmin = new Admin();
-                    break;
-                case 2:
-                    login();
-                    break;
-                case 3:
-                    exit = true;
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
+    // switch (choice) {
+    // case 1:
+    // this.currentAdmin = new Admin();
+    // break;
+    // case 2:
+    // login();
+    // break;
+    // case 3:
+    // exit = true;
+    // break;
+    // default:
+    // System.out.println("Invalid choice. Please try again.");
+    // }
+    // }
+    // }
 
     public void login() {
         System.out.println();
@@ -72,29 +62,20 @@ public class AdminMenu {
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        try (Connection conn = connect()) {
-            String query = "SELECT * FROM Admin WHERE username = ? AND password = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
+        this.currentAdmin = new Admin(username, password);
 
-            if (rs.next()) {
-                this.currentAdmin = new Admin(rs.getString("username"), rs.getString("password"));
-                System.out.println("Login successful.");
-                adminMenu();
-            } else {
-                System.out.println("Invalid credentials.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public void adminMenu() {
         while (true) {
             System.out.println();
             System.out.println("Admin Options:");
+            // Special functionality for root admin to
+            // add other admins
+            if (currentAdmin.getName().equals("root")) {
+
+                System.out.println("0. Add Admin");
+            }
             System.out.println("1. Discount Pass Options");
             System.out.println("2. Trip Options");
             System.out.println("3. Bus Options");
@@ -106,6 +87,14 @@ public class AdminMenu {
             scanner.nextLine();
 
             switch (choice) {
+                case 0:
+                    if (currentAdmin.getName().equals("root")) {
+                        System.out.println("Enter Details for new Admin:");
+                        new Admin();
+                    } else {
+                        System.out.println("Only the root can perform this action!");
+                    }
+                    break;
                 case 1:
                     discountPassMenu();
                     break;
@@ -353,18 +342,18 @@ public class AdminMenu {
             System.out.println("Please login first.");
             return;
         }
-    
+
         boolean exit = false;
         while (!exit) {
             System.out.println("Profile Menu:");
             System.out.println("1. Change Username");
             System.out.println("2. Change Password");
             System.out.println("3. Return");
-    
+
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-    
+
             switch (choice) {
                 case 1:
                     if (currentAdmin.getAdminId() > 0) {
@@ -387,6 +376,6 @@ public class AdminMenu {
                     System.out.println("Invalid choice. Please try again.");
             }
         }
-    
+
     }
 }
