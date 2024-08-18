@@ -43,7 +43,7 @@ public class DiscountPass {
     // Method to set the name with uniqueness validation
     public void setName() {
         HashSet<String> existingNames = getAllDiscountPassNames();
-
+        
         while (true) {
             System.out.print("Enter pass name: ");
             String input = scanner.nextLine();
@@ -78,8 +78,7 @@ public class DiscountPass {
         }
     }
 
-    // Method to retrieve a DiscountPass object from the database using the
-    // DiscountPassID
+    // Method to retrieve a DiscountPass object from the database using the DiscountPassID
     public DiscountPass getDiscountPassFromDB(int discountPassID) {
         String query = "SELECT * FROM DiscountPass WHERE DiscountPassID = ?";
 
@@ -176,7 +175,7 @@ public class DiscountPass {
 
     // Method to print all discount passes
     public void printAllDiscountPasses() {
-        String query = "SELECT * FROM AllDiscountPass";
+        String query = "SELECT * FROM DiscountPass";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement stmt = conn.prepareStatement(query);
@@ -213,6 +212,26 @@ public class DiscountPass {
         }
 
         return nameSet;
+    }
+
+    // Method to retrieve all discount pass IDs from the database
+    public HashSet<Integer> getAllDiscountPassIDs() {
+        String query = "SELECT DiscountPassID FROM DiscountPass";
+        HashSet<Integer> discountPassIDSet = new HashSet<>();
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int discountPassID = rs.getInt("DiscountPassID");
+                discountPassIDSet.add(discountPassID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return discountPassIDSet;
     }
 
     // Getters and Setters
@@ -255,9 +274,9 @@ public class DiscountPass {
         // dp2.getDiscountPercentage()) + "%");
 
         dp1.printAllDiscountPasses();
-        // DiscountPass dp2 = new DiscountPass();
         // DiscountPass dp3 = new DiscountPass();
         // DiscountPass dp4 = new DiscountPass();
+        // DiscountPass dp5 = new DiscountPass();
 
         // dp2.deleteDiscountPassFromDB(dp2.getDiscountPassID());
 
