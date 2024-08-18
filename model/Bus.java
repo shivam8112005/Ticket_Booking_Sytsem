@@ -43,27 +43,46 @@ public class Bus {
 
     // Method to set the number plate with validation
     public void setNumberPlate() {
-        // Define the pattern to match the number plate format
-        // The format is two uppercase letters, followed by two digits,
-        // followed by two uppercase letters, and ending with up to four digits.
-        // Example: AB01XY1234
+        HashSet<String> existingNumberPlates = getAllNumberPlates();
         String platePattern = "^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{1,4}$";
 
         while (true) {
             System.out.print("Enter number plate: ");
             String input = scanner.nextLine();
 
-            // Check if the input matches the plate pattern and is not too long
-            // Adjust the length if needed according to your database schema
             if (Pattern.matches(platePattern, input) && input.length() <= 10) {
-                this.numberPlate = input;
-                break;
+                if (existingNumberPlates.contains(input)) {
+                    System.out.println("Number plate already exists. Please enter a unique number plate.");
+                } else {
+                    this.numberPlate = input;
+                    break;
+                }
             } else {
                 System.out.println("Invalid number plate format. Please re-enter.");
                 System.out.println(
                         "Expected format: AB01XY1234 (two letters, two digits, two letters, up to four digits)");
             }
         }
+    }
+
+    // Method to get a HashSet of all number plates from the database
+    public HashSet<String> getAllNumberPlates() {
+        String query = "SELECT NumberPlate FROM Bus";
+        HashSet<String> numberPlateSet = new HashSet<>();
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String numberPlate = rs.getString("NumberPlate");
+                numberPlateSet.add(numberPlate);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return numberPlateSet;
     }
 
     // Method to add the bus details to the database
@@ -113,6 +132,12 @@ public class Bus {
 
     // Method to update the number plate in the database
     public void updateNumberPlate(String newNumberPlate) {
+        HashSet<String> existingNumberPlates = getAllNumberPlates();
+        if (existingNumberPlates.contains(newNumberPlate)) {
+            System.out.println("Number plate already exists. Please enter a unique number plate.");
+            return;
+        }
+
         String query = "UPDATE Bus SET NumberPlate = ? WHERE BusID = ?";
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -184,23 +209,27 @@ public class Bus {
         }
     }
 
-    public HashSet<Integer> getAllBusIDs() {
-        String query = "SELECT BusID FROM AllBusIDs";
-        HashSet<Integer> busIDSet = new HashSet<>();
+    // Getters and setters
+    public int getBusID() {
+        return busID;
+    }
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-                PreparedStatement stmt = conn.prepareStatement(query);
-                ResultSet rs = stmt.executeQuery()) {
+    public String getNumberPlate() {
+        return numberPlate;
+    }
 
-            while (rs.next()) {
-                int busID = rs.getInt("BusID");
-                busIDSet.add(busID);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public int getNumberOfSeats() {
+        return numberOfSeats;
+    }
 
-        return busIDSet;
+    public void updateNumberPlateInDB(int updateId, String nextLine) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateNumberPlateInDB'");
+    }
+
+    public void updateCapacityInDB(int updateId, int nextInt) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateCapacityInDB'");
     }
 
     // Main method for testing
@@ -239,18 +268,5 @@ public class Bus {
         // Test printing all buses after deletion
         System.out.println("All buses after deletion:");
         bus4.printAllBuses();
-    }
-
-    // Getters and setters
-    public int getBusID() {
-        return busID;
-    }
-
-    public String getNumberPlate() {
-        return numberPlate;
-    }
-
-    public int getNumberOfSeats() {
-        return numberOfSeats;
     }
 }
