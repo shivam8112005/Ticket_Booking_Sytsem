@@ -1,112 +1,198 @@
--- Create the database
-CREATE DATABASE IF NOT EXISTS ticket_booking_db;
+package person;
 
--- Use the database
-USE ticket_booking_db;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.Scanner;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
--- Create the Bus table
-CREATE TABLE IF NOT EXISTS Bus (
-    BusID INT PRIMARY KEY AUTO_INCREMENT,
-    NumberPlate VARCHAR(15) UNIQUE,
-    NumberOfSeats INT
-);
+import menu.AdminMenu;
 
--- Create the Route table
-CREATE TABLE IF NOT EXISTS Route (
-    RouteID INT PRIMARY KEY AUTO_INCREMENT,
-    StartLocation VARCHAR(50),
-    EndLocation VARCHAR(50)
-);
+public class Admin {
+    private Scanner scanner = new Scanner(System.in);
 
--- Create the Trip table
-CREATE TABLE IF NOT EXISTS Trip (
-    TripID INT PRIMARY KEY AUTO_INCREMENT,
-    BusID INT,
-    RouteID INT,
-    StartTime TIMESTAMP,
-    EndTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    Price DECIMAL(10, 2),
-    FOREIGN KEY (BusID) REFERENCES Bus(BusID),
-    FOREIGN KEY (RouteID) REFERENCES Route(RouteID)
-);
+    private int adminId;
+    private String username;
+    private String password;
 
--- Create the DiscountPass table
-CREATE TABLE IF NOT EXISTS DiscountPass (
-    DiscountPassID INT PRIMARY KEY AUTO_INCREMENT,
-    PassName VARCHAR(30) UNIQUE,
-    DiscountPercentage FLOAT
-);
+    private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private final String dbUser = "root";
+    private final String dbPassword = "";
 
--- Create the Customer table
-CREATE TABLE IF NOT EXISTS Customer (
-    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
-    CustomerName VARCHAR(30),
-    CustomerNumber CHAR(10) UNIQUE,
-    CustomerEmail VARCHAR(20) UNIQUE,
-    CustomerDOB DATE,
-    Password VARCHAR(15),
-    DiscountPassID INT,
-    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID)
-);
+    public Admin() {
+        HashSet<String> existingUsernames = getAllUsernames();
 
--- Create the Passenger table
-CREATE TABLE IF NOT EXISTS Passenger (
-    PassengerID INT PRIMARY KEY AUTO_INCREMENT,
-    PassengerName VARCHAR(30),
-    PassengerNumber CHAR(10) UNIQUE,
-    PassengerEmail VARCHAR(20) UNIQUE,
-    PassengerDOB DATE,
-    DiscountPassID INT,
-    AssociatedWith INT,
-    FOREIGN KEY (DiscountPassID) REFERENCES DiscountPass(DiscountPassID),
-    FOREIGN KEY (AssociatedWith) REFERENCES Customer(CustomerID)
-);
+        while (true) {
+            System.out.print("Enter username: ");
+            this.username = scanner.next();
+            scanner.nextLine(); // Consume newline
 
--- Create the Ticket table
-CREATE TABLE IF NOT EXISTS Ticket (
-    TicketID INT PRIMARY KEY AUTO_INCREMENT,
-    TripID INT,
-    BookedBy INT,
-    BookedFor INT,
-    BookTime TIMESTAMP,
-    FOREIGN KEY (TripID) REFERENCES Trip(TripID),
-    FOREIGN KEY (BookedBy) REFERENCES Customer(CustomerID),
-    FOREIGN KEY (BookedFor) REFERENCES Passenger(PassengerID)
-);
+            if (existingUsernames.contains(this.username)) {
+                System.out.println("Username already exists. Please choose another one.");
+            } else {
+                break;
+            }
+        }
 
--- Create table Admin
-CREATE TABLE IF NOT EXISTS Admin (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(50) NOT NULL
-);
--- Insert base user root
-INSERT INTO Admin (username, password) VALUES ('root', '(7f*H7jTek6f7($Z');
+        this.password = setValidPassword();
+        this.adminId = saveToDB(username, this.password);
+    }
 
+    public Admin(int a) {
+        // For methods that might require adminId directly
+    }
 
--- Views
+    public Admin(String username, String password) {
+        this.username = username;
+        this.password = password;
 
--- View to get all BusID
-CREATE VIEW AllBusIDs AS 
-SELECT BusID FROM Bus;
+        String query = "SELECT id FROM Admin WHERE username = ? AND password = ?";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query);
 
--- View to get all RouteID
-CREATE VIEW AllRouteIDs AS 
-SELECT RouteID FROM Route;
+            pst.setString(1, this.username);
+            pst.setString(2, this.password);
+            ResultSet rs = pst.executeQuery();
 
--- View to get all DiscountPassID
-CREATE VIEW AllDiscountPassIDs AS 
-SELECT DiscountPassID FROM DiscountPass;
+            if (rs.next()) {
+                this.adminId = rs.getInt("id");
+                AdminMenu am = new AdminMenu(this);
+                am.adminMenu(); // open menu after login
+            } else {
+                System.out.println("Invalid username or password.");
+                // return to sign-up menu or handle error
+            }
+        } catch (SQLException e) {
+            System.out.println("Error during login: " + e.getMessage());
+        }
+    }
 
---View to get all Bus
-CREATE VIEW AllBus AS 
-SELECT * FROM Bus;
+    public int saveToDB(String username, String password) {
+        String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
---View to get all Route
-CREATE VIEW AllRoute AS 
-SELECT * FROM Route;
+            pst.setString(1, username);
+            pst.setString(2, password);
+            pst.executeUpdate();
 
---View to get all DiscountPass
-CREATE VIEW AllDiscountPass AS 
-SELECT * FROM DiscountPass;
+            // Retrieve the generated ID
+            ResultSet generatedKeys = pst.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int Id = generatedKeys.getInt(1);
+                System.out.println("Admin added successfully with ID: " + Id);
+                return Id;
+            } else {
+                System.out.println("Failed to obtain admin ID.");
+                return -1; // using -1 to indicate error
+            }
+        } catch (SQLException e) {
+            System.out.println("Error adding admin: " + e.getMessage());
+            return -1; // using -1 to indicate error
+        }
+    }
 
+    public String setValidPassword() {
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+        String pass;
+        while (true) {
+            System.out.print("Enter password: ");
+            pass = scanner.nextLine();
+            if (Pattern.matches(regex, pass)) {
+                return pass;
+            } else {
+                System.out.println(
+                        "Password must be at least 8 characters long, contain at least 1 digit, 1 lowercase letter, and 1 uppercase letter.");
+                System.out.println();
+            }
+        }
+    }
+
+    public void updateUsername(int id) {
+        HashSet<String> existingUsernames = getAllUsernames();
+
+        while (true) {
+            System.out.print("Enter new username: ");
+            String newUsername = scanner.nextLine();
+            if (existingUsernames.contains(newUsername)) {
+                System.out.println("Username already exists. Please choose another one.");
+            } else {
+                String query = "UPDATE Admin SET username = ? WHERE id = ?";
+                try {
+                    Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+                    PreparedStatement pst = connection.prepareStatement(query);
+
+                    pst.setString(1, newUsername);
+                    pst.setInt(2, id);
+
+                    int rowsAffected = pst.executeUpdate();
+                    if (rowsAffected > 0) {
+                        System.out.println("Username updated successfully.");
+                        break; // Exit loop after successful update
+                    } else {
+                        System.out.println("No record found with ID: " + id);
+                        break; // Exit loop on error
+                    }
+
+                } catch (SQLException e) {
+                    System.out.println("Error updating username: " + e.getMessage());
+                    break; // Exit loop on error
+                }
+            }
+        }
+    }
+
+    public void updatePassword(int id) {
+        String newPassword = setValidPassword();
+        String query = "UPDATE Admin SET password = ? WHERE id = ?";
+
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query);
+
+            pst.setString(1, newPassword);
+            pst.setInt(2, id);
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Password updated successfully.");
+            } else {
+                System.out.println("No record found with ID: " + id);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error updating password: " + e.getMessage());
+        }
+    }
+
+    public int getAdminId() {
+        return adminId;
+    }
+
+    public String getName() {
+        return username;
+    }
+
+    private HashSet<String> getAllUsernames() {
+        HashSet<String> usernames = new HashSet<>();
+        String query = "SELECT username FROM Admin";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                usernames.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving usernames: " + e.getMessage());
+        }
+        return usernames;
+    }
+}
