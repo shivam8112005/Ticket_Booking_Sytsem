@@ -1,198 +1,162 @@
-package person;
+import java.sql.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.HashSet;
-import java.util.regex.Pattern;
-import java.util.Scanner;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+public class DatabaseUtil {
+    private static final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
 
-import menu.AdminMenu;
-
-public class Admin {
-    private Scanner scanner = new Scanner(System.in);
-
-    private int adminId;
-    private String username;
-    private String password;
-
-    private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
-    private final String dbUser = "root";
-    private final String dbPassword = "";
-
-    public Admin() {
-        HashSet<String> existingUsernames = getAllUsernames();
-
-        while (true) {
-            System.out.print("Enter username: ");
-            this.username = scanner.next();
-            scanner.nextLine(); // Consume newline
-
-            if (existingUsernames.contains(this.username)) {
-                System.out.println("Username already exists. Please choose another one.");
-            } else {
-                break;
-            }
-        }
-
-        this.password = setValidPassword();
-        this.adminId = saveToDB(username, this.password);
+    public static Connection getConnection() throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    public Admin(int a) {
-        // For methods that might require adminId directly
-    }
-
-    public Admin(String username, String password) {
-        this.username = username;
-        this.password = password;
-
-        String query = "SELECT id FROM Admin WHERE username = ? AND password = ?";
+    public static void insertAdmin(String userName, String password, String phoneNumber) {
         try {
-            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-            PreparedStatement pst = connection.prepareStatement(query);
-
-            pst.setString(1, this.username);
-            pst.setString(2, this.password);
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                this.adminId = rs.getInt("id");
-                AdminMenu am = new AdminMenu(this);
-                am.adminMenu(); // open menu after login
-            } else {
-                System.out.println("Invalid username or password.");
-                // return to sign-up menu or handle error
-            }
-        } catch (SQLException e) {
-            System.out.println("Error during login: " + e.getMessage());
+            Connection con = getConnection();
+            CallableStatement cst = con.prepareCall("{call addAdmin(?,?,?)}");
+            cst.setString(1, userName);
+            cst.setString(2, password);
+            cst.setString(3, phoneNumber);
+            int r = cst.executeUpdate();
+            System.out.println(r > 0 ? "added succesfullly" : "Not added");
+        } catch (Exception e) {
+            System.out.println("Exception Thrown" + e);
+            return;
         }
     }
 
-    public int saveToDB(String username, String password) {
-        String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
+    public static boolean checkAdmin(String userName, String pass) {
         try {
-            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-            PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            Connection con = getConnection();
+            CallableStatement cst = con.prepareCall("{call checkAdmin(?,?)}");
+            cst.setString(1, userName);
+            cst.setString(2, pass);
+            ResultSet rs = cst.executeQuery();
+            if (rs == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println("Exception aave che" + e);
+            return false;
+        }
+    }
 
-            pst.setString(1, username);
-            pst.setString(2, password);
+    public static void changeName(int id, String name) {
+        try {
+            Connection con = getConnection();
+            CallableStatement cst = con.prepareCall("{call updateAdminUsername(?,?)}");
+            cst.setInt(1, id);
+            cst.setString(2, name);
+            int r = cst.executeUpdate();
+            System.out.println(r > 0 ? "changed succesfullly" : "Not changed");
+        } catch (Exception e) {
+            System.out.println("Exception Thrown+++" + e);
+        }
+    }
+
+    public static void changePassword(int id, String password) {
+        try {
+            Connection con = getConnection();
+            CallableStatement cst = con.prepareCall("{call updateAdminPassword(?,?)}");
+            cst.setInt(1, id);
+            cst.setString(2, password);
+            int r = cst.executeUpdate();
+            System.out.println(r > 0 ? "changed succesfullly" : "Not changed");
+        } catch (Exception e) {
+            System.out.println("Exception Thrown+++" + e);
+        }
+    }
+
+    public static void changePhone(int id, String phoneNumber) {
+        try {
+            Connection con = getConnection();
+            CallableStatement cst = con.prepareCall("{call updateAdminPhone(?,?)}");
+            cst.setInt(1, id);
+            cst.setString(2, phoneNumber);
+            int r = cst.executeUpdate();
+            System.out.println(r > 0 ? "changed succesfullly" : "Not changed");
+        } catch (Exception e) {
+            System.out.println("Exception Thrown+++" + e);
+        }
+    }
+    public static void deleteDiscountPass(int id){
+        try{
+            String querry="DELETE FROM discountpass WHERE passid = ?";
+            PreparedStatement pst=getConnection().prepareStatement(querry);
+            pst.setInt(1, id);
             pst.executeUpdate();
-
-            // Retrieve the generated ID
-            ResultSet generatedKeys = pst.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                int Id = generatedKeys.getInt(1);
-                System.out.println("Admin added successfully with ID: " + Id);
-                return Id;
-            } else {
-                System.out.println("Failed to obtain admin ID.");
-                return -1; // using -1 to indicate error
-            }
-        } catch (SQLException e) {
-            System.out.println("Error adding admin: " + e.getMessage());
-            return -1; // using -1 to indicate error
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
 
-    public String setValidPassword() {
-        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
-        String pass;
-        while (true) {
-            System.out.print("Enter password: ");
-            pass = scanner.nextLine();
-            if (Pattern.matches(regex, pass)) {
-                return pass;
-            } else {
-                System.out.println(
-                        "Password must be at least 8 characters long, contain at least 1 digit, 1 lowercase letter, and 1 uppercase letter.");
-                System.out.println();
-            }
+    // public static void setDiscPass() throws Exception {
+    //     LinkedList<DiscountPass> discountPasses = new LinkedList<>();
+    //     Connection con = getConnection();
+    //     Statement st = con.createStatement();
+    //     ResultSet rs = st.executeQuery("select * from discountpass");
+    //     while (rs.next()) {
+    //         DiscountPass discountPass = new DiscountPass(rs.getInt(1), rs.getString(2), rs.getFloat(3));
+    //         System.out.println("Added");
+    //         discountPasses.add(discountPass);
+    //     }
+
+    // }
+    
+    public static void insertDiscountPass(String passname,float discountpercent) throws Exception{
+        String querry="INSERT INTO discountpass (passname, discountpercent) VALUES (?,?)";
+        PreparedStatement pst=getConnection().prepareStatement(querry);
+        pst.setString(1, passname);
+        pst.setFloat(2, discountpercent);
+        int r=pst.executeUpdate();
+        if(r>0){
+            System.out.println("pass Added Successfully .");
         }
     }
-
-    public void updateUsername(int id) {
-        HashSet<String> existingUsernames = getAllUsernames();
-
-        while (true) {
-            System.out.print("Enter new username: ");
-            String newUsername = scanner.nextLine();
-            if (existingUsernames.contains(newUsername)) {
-                System.out.println("Username already exists. Please choose another one.");
-            } else {
-                String query = "UPDATE Admin SET username = ? WHERE id = ?";
-                try {
-                    Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                    PreparedStatement pst = connection.prepareStatement(query);
-
-                    pst.setString(1, newUsername);
-                    pst.setInt(2, id);
-
-                    int rowsAffected = pst.executeUpdate();
-                    if (rowsAffected > 0) {
-                        System.out.println("Username updated successfully.");
-                        break; // Exit loop after successful update
-                    } else {
-                        System.out.println("No record found with ID: " + id);
-                        break; // Exit loop on error
-                    }
-
-                } catch (SQLException e) {
-                    System.out.println("Error updating username: " + e.getMessage());
-                    break; // Exit loop on error
-                }
-            }
+    public static void alterDiscountPassName(String name,int passid){
+        try{
+            String querry="UPDATE discountpass SET passname = ? WHERE passid = ?";
+        PreparedStatement pst=getConnection().prepareStatement(querry);
+        pst.setString(1, name);
+        pst.setInt(2, passid);
+        pst.executeUpdate();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
-
-    public void updatePassword(int id) {
-        String newPassword = setValidPassword();
-        String query = "UPDATE Admin SET password = ? WHERE id = ?";
-
-        try {
-            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-            PreparedStatement pst = connection.prepareStatement(query);
-
-            pst.setString(1, newPassword);
-            pst.setInt(2, id);
-
-            int rowsAffected = pst.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Password updated successfully.");
-            } else {
-                System.out.println("No record found with ID: " + id);
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Error updating password: " + e.getMessage());
+    public static void alterDiscountPasspercent(float percent, int id){
+        try{
+            String querry="UPDATE discountpass SET discountpercent = ? WHERE passid = ?";
+        PreparedStatement pst=getConnection().prepareStatement(querry);
+        pst.setFloat(1, percent);
+        pst.setInt(2, id);
+        pst.executeUpdate();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
+    // // try {
+    // Connection con = getConnection();
+    // CallableStatement cst = con.prepareCall("{call viewDiscountPass(?,?,?)}");
+    // // You need to set the input parameters for the stored procedure
+    // // cst.setInt(1, /* input parameter 1 */);
+    // // cst.setString(2, /* input parameter 2 */);
+    // // cst.setFloat(3, /* input parameter 3 */);
+    // ResultSet rs = cst.executeQuery();
+    // while (rs.next()) {
+    // int id = rs.getInt(1);
+    // String name = rs.getString(2);
+    // float disc = rs.getFloat(3);
+    // DiscountPass discountPass = new DiscountPass(id, name, disc);
+    // discountPasses.add(discountPass);
+    // }
+    // System.out.println("Discount Passes Viewed");
+    // // } catch (Exception e) {
+    // // System.out.println("Exception Thrown+++" + e);
+    // // }
+    // return discountPasses;
 
-    public int getAdminId() {
-        return adminId;
-    }
-
-    public String getName() {
-        return username;
-    }
-
-    private HashSet<String> getAllUsernames() {
-        HashSet<String> usernames = new HashSet<>();
-        String query = "SELECT username FROM Admin";
-        try {
-            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-
-            while (rs.next()) {
-                usernames.add(rs.getString("username"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error retrieving usernames: " + e.getMessage());
-        }
-        return usernames;
-    }
+   // public static void
 }
