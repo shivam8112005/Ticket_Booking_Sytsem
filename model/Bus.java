@@ -230,40 +230,40 @@ public class Bus {
 
     // Main method for testing
     public static void main(String[] args) {
-        // Test adding a bus
+        // // Test adding a bus
         // Bus bus1 = new Bus(); // Prompts for input
         // Bus bus2 = new Bus(); // Prompts for input
         // Bus bus3 = new Bus(); // Prompts for input
-        Bus bus4 = new Bus(0); // Prompts for input
+        // Bus bus4 = new Bus(0); // Prompts for input
 
-        // // Test retrieving a bus
-        // Bus retrievedBus = Bus.getBusFromDB(bus1.getBusID());
+        // // // Test retrieving a bus
+        // Bus retrievedBus = bus1.getBusFromDB(bus1.getBusID());
         // if (retrievedBus != null) {
         // System.out.println(
         // "Retrieved Bus: " + retrievedBus.getNumberPlate() + ", Seats: " +
         // retrievedBus.getNumberOfSeats());
         // }
 
-        // // Test updating the number plate
+        // // // Test updating the number plate
         // if (retrievedBus != null) {
         // retrievedBus.updateNumberPlate("XX99 AA 1234");
         // }
 
-        // // Test updating the number of seats
+        // // // Test updating the number of seats
         // if (retrievedBus != null) {
         // retrievedBus.updateNumberOfSeats(50);
         // }
 
-        // // Test printing all buses
+        // // // Test printing all buses
         // System.out.println("All buses:");
-        // printAllBuses();
+        // bus1.printAllBuses();
 
         // // Test deleting a bus
-        // deleteBusByID(bus1.getBusID());
+        // bus1.deleteBusByID(bus1.getBusID());
 
-        // Test printing all buses after deletion
-        System.out.println("All buses after deletion:");
-        bus4.printAllBuses();
+        // // Test printing all buses after deletion
+        // System.out.println("All buses after deletion:");
+        // bus4.printAllBuses();
     }
 
     // Getters and setters
@@ -279,13 +279,4 @@ public class Bus {
         return numberOfSeats;
     }
 
-    public void updateNumberPlateInDB(int updateId, String nextLine) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateNumberPlateInDB'");
-    }
-
-    public void updateCapacityInDB(int updateId, int nextInt) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateCapacityInDB'");
-    }
 }
