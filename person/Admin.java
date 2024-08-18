@@ -2,6 +2,7 @@ package person;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.sql.PreparedStatement;
@@ -23,12 +24,22 @@ public class Admin {
     private final String dbPassword = "";
 
     public Admin() {
-        System.out.print("Enter username: ");
-        this.username = scanner.next();
+        HashSet<String> existingUsernames = getAllUsernames();
+
+        while (true) {
+            System.out.print("Enter username: ");
+            this.username = scanner.next();
+            scanner.nextLine(); // Consume newline
+
+            if (existingUsernames.contains(this.username)) {
+                System.out.println("Username already exists. Please choose another one.");
+            } else {
+                break;
+            }
+        }
+
         this.password = setValidPassword();
         this.adminId = saveToDB(username, this.password);
-        AdminMenu am = new AdminMenu(this);
-        am.adminMenu();// open menu after u have register
     }
 
     public Admin(int a) {
@@ -40,8 +51,9 @@ public class Admin {
         this.password = password;
 
         String query = "SELECT id FROM Admin WHERE username = ? AND password = ?";
-        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query)) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query);
 
             pst.setString(1, this.username);
             pst.setString(2, this.password);
@@ -62,8 +74,9 @@ public class Admin {
 
     public int saveToDB(String username, String password) {
         String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
-        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             pst.setString(1, username);
             pst.setString(2, password);
@@ -73,7 +86,7 @@ public class Admin {
             ResultSet generatedKeys = pst.getGeneratedKeys();
             if (generatedKeys.next()) {
                 int Id = generatedKeys.getInt(1);
-                System.out.println("Admin added successfully with ID: " + this.adminId);
+                System.out.println("Admin added successfully with ID: " + Id);
                 return Id;
             } else {
                 System.out.println("Failed to obtain admin ID.");
@@ -102,25 +115,36 @@ public class Admin {
     }
 
     public void updateUsername(int id) {
-        System.out.print("Enter new username: ");
-        String newUsername = scanner.nextLine();
-        String query = "UPDATE Admin SET username = ? WHERE id = ?";
+        HashSet<String> existingUsernames = getAllUsernames();
 
-        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query)) {
-
-            pst.setString(1, newUsername);
-            pst.setInt(2, id);
-
-            int rowsAffected = pst.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Username updated successfully.");
+        while (true) {
+            System.out.print("Enter new username: ");
+            String newUsername = scanner.nextLine();
+            if (existingUsernames.contains(newUsername)) {
+                System.out.println("Username already exists. Please choose another one.");
             } else {
-                System.out.println("No record found with ID: " + id);
-            }
+                String query = "UPDATE Admin SET username = ? WHERE id = ?";
+                try {
+                    Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+                    PreparedStatement pst = connection.prepareStatement(query);
 
-        } catch (SQLException e) {
-            System.out.println("Error updating username: " + e.getMessage());
+                    pst.setString(1, newUsername);
+                    pst.setInt(2, id);
+
+                    int rowsAffected = pst.executeUpdate();
+                    if (rowsAffected > 0) {
+                        System.out.println("Username updated successfully.");
+                        break; // Exit loop after successful update
+                    } else {
+                        System.out.println("No record found with ID: " + id);
+                        break; // Exit loop on error
+                    }
+
+                } catch (SQLException e) {
+                    System.out.println("Error updating username: " + e.getMessage());
+                    break; // Exit loop on error
+                }
+            }
         }
     }
 
@@ -128,8 +152,9 @@ public class Admin {
         String newPassword = setValidPassword();
         String query = "UPDATE Admin SET password = ? WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement pst = connection.prepareStatement(query)) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement pst = connection.prepareStatement(query);
 
             pst.setString(1, newPassword);
             pst.setInt(2, id);
@@ -154,4 +179,20 @@ public class Admin {
         return username;
     }
 
+    private HashSet<String> getAllUsernames() {
+        HashSet<String> usernames = new HashSet<>();
+        String query = "SELECT username FROM Admin";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                usernames.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving usernames: " + e.getMessage());
+        }
+        return usernames;
+    }
 }
