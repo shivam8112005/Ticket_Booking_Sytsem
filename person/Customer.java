@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,6 +17,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.sql.Statement;
+
 
 import model.DiscountPass;
 import model.Ticket;
@@ -177,16 +179,33 @@ public class Customer {
     private java.sql.Date getValidDOB() {
         Scanner scanner = new Scanner(System.in);
         java.sql.Date date = null;
+    
         while (true) {
             System.out.print("Enter Date of Birth (yyyy-mm-dd): ");
             String dobInput = scanner.nextLine();
+    
             try {
-                date = java.sql.Date.valueOf(dobInput);
-                break; // If successful, break the loop
-            } catch (IllegalArgumentException e) {
+                // Convert the input string to a LocalDate
+                LocalDate dob = LocalDate.parse(dobInput);
+    
+                // Get the current date
+                LocalDate currentDate = LocalDate.now();
+    
+                // Check if the entered DOB is not in the future
+                if (dob.isAfter(currentDate)) {
+                    System.out.println("Error: Date of Birth cannot be in the future.");
+                    continue; // Ask the user to enter the date again
+                }
+    
+                // Convert LocalDate to java.sql.Date
+                date = java.sql.Date.valueOf(dob);
+                break; // If successful and valid, break the loop
+    
+            } catch (DateTimeParseException e) {
                 System.out.println("Invalid date format. Please enter the date in yyyy-mm-dd format.");
             }
         }
+    
         return date;
     }
 
@@ -275,7 +294,6 @@ public class Customer {
             routeStatement.setString(1, startLocation);
             routeStatement.setString(2, endLocation);
             ResultSet routeResultSet = routeStatement.executeQuery();
-
             if (routeResultSet.next()) {
                 routeId = routeResultSet.getInt("RouteID");
             } else {
@@ -859,10 +877,34 @@ public class Customer {
                     updateEmail(this.id, newEmail);
                     break;
                 case 4:
-                    System.out.print("Enter new DOB (yyyy-mm-dd): ");
-                    String dobInput = scanner.nextLine();
-                    Date newDob = java.sql.Date.valueOf(dobInput);
-                    updateDob(this.id, newDob);
+                    // Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter new DOB (yyyy-mm-dd): ");
+        String dobInput = scanner.nextLine();
+
+        try {
+            // Parse the input date
+            LocalDate newDob = LocalDate.parse(dobInput);
+
+            // Get the current date
+            LocalDate currentDate = LocalDate.now();
+
+            // Check if the entered DOB is not in the future
+            if (newDob.isAfter(currentDate)) {
+                System.out.println("Error: Date of Birth cannot be in the future.");
+                return;
+            }
+
+            // Convert LocalDate to java.sql.Date
+            java.sql.Date sqlDate = java.sql.Date.valueOf(newDob);
+
+            // Proceed to update the DOB
+            updateDob(this.id, sqlDate);
+
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Please enter the date in yyyy-mm-dd format.");
+        }
+                   // updateDob(this.id, newDob);
                     break;
                 case 5:
                     DiscountPass dp = new DiscountPass(0);
@@ -955,10 +997,30 @@ public class Customer {
                     passenger.updateEmail(passenger.getID(), newEmail);
                     break;
                 case 4:
+                boolean validDob = false;
+                LocalDate newDob = null;
+        
+                while (!validDob) {
                     System.out.print("Enter new DOB (yyyy-mm-dd): ");
                     String dobInput = scanner.nextLine();
-                    Date newDob = java.sql.Date.valueOf(dobInput);
-                    passenger.updateDob(passenger.getID(), newDob);
+                    
+                    try {
+                        newDob = LocalDate.parse(dobInput);
+                        // Check if the date is in the future
+                        if (newDob.isAfter(LocalDate.now())) {
+                            System.out.println("DOB cannot be a future date. Please enter a valid date.");
+                        } else {
+                            validDob = true;
+                        }
+                    } catch (DateTimeParseException e) {
+                        System.out.println("Invalid date format. Please enter the date in the format yyyy-mm-dd.");
+                    }
+                }
+        
+                // Convert LocalDate to java.sql.Date for database update
+                java.sql.Date sqlDate = java.sql.Date.valueOf(newDob);
+                passenger.updateDob(passenger.getID(), sqlDate);
+                System.out.println("DOB updated successfully.");
                     break;
                 case 5:
                     System.out.print("Enter new Discount Pass ID: ");

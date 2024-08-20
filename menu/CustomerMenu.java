@@ -82,6 +82,7 @@ public class CustomerMenu {
             switch (c) {
                 case 1:
                     try {
+                     //  Trip trip = new Trip();
                         currentCustomer.bookTicketDisplay();
                     } catch (Exception e) {
                         e.printStackTrace();

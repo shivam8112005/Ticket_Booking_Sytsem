@@ -23,7 +23,12 @@ public class Main {
             switch (choice) {
                 case 1:
                     CustomerMenu cm = new CustomerMenu(0);
-                    cm.signUpMenu();
+                    try {
+                        cm.signUpMenu();
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     break;
                 case 2:
                     AdminMenu am = new AdminMenu(0);

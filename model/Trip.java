@@ -110,7 +110,7 @@ public class Trip {
                 this.routeID = routeID;
                 return;
             }
-            System.out.println("Invalid busID");
+            System.out.println("Invalid RouteID");
         }
     }
 
