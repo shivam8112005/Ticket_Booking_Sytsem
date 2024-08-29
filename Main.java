@@ -1,6 +1,7 @@
 import java.util.Scanner;
 import menu.AdminMenu;
 import menu.CustomerMenu;
+import model.Trip;
 
 public class Main {
 
@@ -10,20 +11,25 @@ public class Main {
         // Start the table cleanup thread
         TableCleanupTask cleanupTask = new TableCleanupTask();
         cleanupTask.start();
-
+       // Trip t=new Trip();
         int choice;
         while (true) {
+           System.out.println("--------------------------- Sign In ------------------------");
             System.out.println("Please select an option:");
             System.out.println("1. Log in as Customer");
             System.out.println("2. Log in as Admin");
             System.out.println("3. Close the program");
-
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
             switch (choice) {
                 case 1:
                     CustomerMenu cm = new CustomerMenu(0);
-                    cm.signUpMenu();
+                    try {
+                        cm.signUpMenu();
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     break;
                 case 2:
                     AdminMenu am = new AdminMenu(0);

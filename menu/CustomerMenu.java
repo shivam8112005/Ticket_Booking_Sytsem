@@ -22,16 +22,16 @@ public class CustomerMenu {
         // ));
         // Bus bus=new Bus(t);
         // bus.getAllBus().put(bus, t);
-        CustomerMenu cm = new CustomerMenu(10);
-        cm.signUpMenu();
+        // CustomerMenu cm = new CustomerMenu(10);
+        // cm.signUpMenu();
     }
 
-    public void signUpMenu() throws Exception {
+    public void signUpMenu() throws Exception { 
         boolean exit = true;
 
         while (exit) {
-            System.out.println();
-            System.out.println("User Menu:");
+            System.out.println("----------------------------- User Menu -----------------------------");
+            
             System.out.println("1. Register");
             System.out.println("2. Login");
             System.out.println("3. Return");
@@ -59,7 +59,7 @@ public class CustomerMenu {
     }
 
     public void customerLogIn() throws Exception {
-            System.out.println("Log In: ");
+            System.out.println("------------------------------- Log In -------------------------------");
             System.out.print("Enter email: ");
             String email = sc.next();
             System.out.print("Enter password: ");
@@ -70,7 +70,7 @@ public class CustomerMenu {
     private void customerMenu() {
         boolean exit = true;
         while (exit) {
-            System.out.println();
+            System.out.println("----------------------------- Ticket Booking System ----------------------");
             System.out.println("1. Book Ticket");
             System.out.println("2. View Trips");
             System.out.println("3. Upcoming Journeys");
@@ -79,9 +79,11 @@ public class CustomerMenu {
             System.out.println("6. Return");
             System.out.print("Enter you choice: ");
             int c = sc.nextInt();
+            sc.nextLine();
             switch (c) {
                 case 1:
                     try {
+                     //  Trip trip = new Trip();
                         currentCustomer.bookTicketDisplay();
                     } catch (Exception e) {
                         e.printStackTrace();
