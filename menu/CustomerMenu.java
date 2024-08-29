@@ -38,7 +38,7 @@ public class CustomerMenu {
 
             System.out.print("Enter your choice: ");
             choice = sc.nextInt();
-
+            sc.nextLine();
             switch (choice) {
                 case 1:
                     this.currentCustomer = new Customer();

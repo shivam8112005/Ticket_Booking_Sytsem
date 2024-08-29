@@ -4,7 +4,11 @@ import menu.CustomerMenu;
 import model.Trip;
 
 public class Main {
-
+public interface util1{
+   String setValidPassword();
+   void updateName();
+   int saveToDB();
+}
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -21,6 +25,7 @@ public class Main {
             System.out.println("3. Close the program");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
+            scanner.nextLine();
             switch (choice) {
                 case 1:
                     CustomerMenu cm = new CustomerMenu(0);

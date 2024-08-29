@@ -72,6 +72,10 @@ public class AdminMenu {
             System.out.println("Admin Options:");
             // Special functionality for root admin to
             // add other admins
+            Thread t=new Thread(this.currentAdmin);
+         //   System.out.println("hjfewubfuebwufe 111111111111111");
+            t.start();
+         //   System.out.println("shegfuewufh 33333333333333333");
             if (currentAdmin.getName().equals("root")) {
 
                 System.out.println("0. Add Admin");
@@ -90,7 +94,7 @@ public class AdminMenu {
                 case 0:
                     if (currentAdmin.getName().equals("root")) {
                         System.out.println("Enter Details for new Admin:");
-                        new Admin();
+                        new Admin(this.currentAdmin);
                     } else {
                         System.out.println("Only the root can perform this action!");
                     }
@@ -357,7 +361,7 @@ public class AdminMenu {
             switch (choice) {
                 case 1:
                     if (currentAdmin.getAdminId() > 0) {
-                        currentAdmin.updateUsername(currentAdmin.getAdminId());
+                        currentAdmin.updateName();
                     } else {
                         System.out.println("Invalid Admin ID.");
                     }

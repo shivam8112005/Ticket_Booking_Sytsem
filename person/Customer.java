@@ -30,7 +30,8 @@ import java.io.*;
 import model.DiscountPass;
 import model.Ticket;
 
-public class Customer {
+
+public class Customer{
     private int id;
     private String name;
     private String phoneNumber;
@@ -42,6 +43,7 @@ public class Customer {
     private final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private final String USER = "root";
     private final String PASSWORD = "";
+    public static Scanner scanner=new Scanner(System.in);
 
     // No-parameter constructor for register
     public Customer() {
@@ -56,8 +58,8 @@ public class Customer {
 
         this.email = getValidEmail();
 
-        System.out.print("Enter Password: ");
-        this.userPassword = getValidPassword();
+       // System.out.print("Enter Password: ");
+        this.userPassword = setValidPassword();
 
         this.dob = getValidDOB();
 
@@ -83,7 +85,7 @@ public class Customer {
         }
 
         // Call the method to add the customer to the database
-        this.addCustomerToDB(this.name, this.phoneNumber, this.email, this.userPassword, this.dob, this.discountPassId);
+        this.id=this.saveToDB();
     }
 
     // Parameterized constructor for login
@@ -138,7 +140,7 @@ public class Customer {
         return email;
     }
 
-    public String getValidPassword() {
+    public String setValidPassword() {
         Scanner scanner = new Scanner(System.in);
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
         String pass;
@@ -156,9 +158,14 @@ public class Customer {
     }
 
     // Method to add a customer to the database
-    public void addCustomerToDB(String name, String phoneNumber, String email, String password, Date dob,
-            int discountPassId) {
+    public int saveToDB() {
         try {
+            String name=this.getName();
+            String phoneNumber=this.getPhoneNumber();
+            String email=this.getEmail();
+            String password=this.getPassword();
+            Date dob=this.getDob();
+            int discountPassId=this.getDiscountPassId();
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "INSERT INTO Customer (CustomerName, CustomerNumber, CustomerEmail, Password, CustomerDOB, DiscountPassID) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -176,11 +183,12 @@ public class Customer {
             pst.setString(1, this.getEmail());
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                this.id = rs.getInt("CustomerID");
+               return rs.getInt("CustomerID");
             }
         } catch (SQLException e) {
-            System.out.println((e.getMessage()));
-        }
+            System.out.println((e.getMessage())+" Try Again !");
+            
+        }return -1;
     }
 
     private java.sql.Date getValidDOB() {
@@ -879,16 +887,18 @@ public class Customer {
     }
 
     // Method to update the name
-    public void updateName(int customerId, String newName) {
+    public void updateName() {
+        System.out.print("Enter new Name: ");
+                    String newName = scanner.nextLine();
         String sql = "UPDATE Customer SET CustomerName = ? WHERE CustomerID = ?";
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
                 PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             preparedStatement.setString(1, newName);
-            preparedStatement.setInt(2, customerId);
+            preparedStatement.setInt(2, this.getID());
             preparedStatement.executeUpdate();
-
+this.name=newName;
             System.out.println("Name updated successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1084,9 +1094,8 @@ public class Customer {
 
             switch (choice) {
                 case 1:
-                    System.out.print("Enter new Name: ");
-                    String newName = scanner.nextLine();
-                    updateName(this.id, newName);
+                    
+                    updateName();
                     break;
                 case 2:
                     System.out.print("Enter new Phone Number: ");
@@ -1138,7 +1147,7 @@ public class Customer {
                     break;
                 case 6:
                     System.out.print("Enter new Password: ");
-                    String newPassword = getValidPassword();
+                    String newPassword = setValidPassword();
                     updatePassword(this.id, newPassword);
                     break;
                 case 7:
