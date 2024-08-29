@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 import com.mysql.cj.xdevapi.PreparableStatement;
 
+import DataStructure.InputValidator;
+
 import java.util.LinkedList;
 
 //import com.mysql.cj.exceptions.ExceptionFactory;
@@ -28,10 +30,10 @@ import java.sql.Statement;
 
 import java.io.*;
 import model.DiscountPass;
-import model.Ticket;
 
 
-public class Customer{
+
+public class Customer implements util{
     private int id;
     private String name;
     private String phoneNumber;
@@ -39,12 +41,12 @@ public class Customer{
     private String email;
     private String userPassword;
     private int discountPassId;
-
+   // HashSet<String> emailSet;
     private final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private final String USER = "root";
     private final String PASSWORD = "";
     public static Scanner scanner=new Scanner(System.in);
-
+static InputValidator ip=new InputValidator();
     // No-parameter constructor for register
     public Customer() {
         Scanner scanner = new Scanner(System.in);
@@ -139,7 +141,7 @@ public class Customer{
 
         return email;
     }
-
+@Override
     public String setValidPassword() {
         Scanner scanner = new Scanner(System.in);
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
@@ -158,12 +160,13 @@ public class Customer{
     }
 
     // Method to add a customer to the database
+    @Override
     public int saveToDB() {
         try {
             String name=this.getName();
             String phoneNumber=this.getPhoneNumber();
             String email=this.getEmail();
-            String password=this.getPassword();
+            String password=ip.encryptPassword(this.getPassword());
             Date dob=this.getDob();
             int discountPassId=this.getDiscountPassId();
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -187,7 +190,7 @@ public class Customer{
             }
         } catch (SQLException e) {
             System.out.println((e.getMessage())+" Try Again !");
-            
+           // throw new RuntimeException(e);
         }return -1;
     }
 
@@ -227,13 +230,13 @@ public class Customer{
     // Method to retrieve a customer from the database using the ID
     public Customer loginCustomerFromDB(String email, String pass) {
         Customer customer = null;
-
+String passw=ip.encryptPassword(pass);
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "SELECT * FROM Customer WHERE CustomerEmail = ? AND Password = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, email);
-            preparedStatement.setString(2, pass);
+            preparedStatement.setString(2, passw);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -887,6 +890,7 @@ public class Customer{
     }
 
     // Method to update the name
+    @Override
     public void updateName() {
         System.out.print("Enter new Name: ");
                     String newName = scanner.nextLine();
@@ -1014,6 +1018,7 @@ this.name=newName;
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
+            
             System.out.println();
             System.out.println("------------------------- Profile Menu -----------------------");
             System.out.println("1. View Profile");

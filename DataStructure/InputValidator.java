@@ -1,3 +1,4 @@
+package DataStructure;
 import java.sql.SQLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -131,24 +132,24 @@ public class InputValidator {
     //     return false;
     // }
 
-    public boolean isUniqueCustomerEmail(String email) {
+    // public boolean isUniqueCustomerEmail(String email) {
 
-      //  try {
-        //     DBConnectorCustomer dbConnector = new DBConnectorCustomer();
-        //     HashMap<Integer, String> emailMap = dbConnector.getAllCustomerEmails();
+    //   //  try {
+    //     //     DBConnectorCustomer dbConnector = new DBConnectorCustomer();
+    //     //     HashMap<Integer, String> emailMap = dbConnector.getAllCustomerEmails();
 
-        //     if (!emailMap.containsValue(email)) {
-        //         return true;
-        //     } else {
-        //         return false;
-        //     }
-        // } catch (SQLException e) {
-        //     System.out.println("Database error while checking email. Please try again later.");
-        //     e.printStackTrace();
-        // }
+    //     //     if (!emailMap.containsValue(email)) {
+    //     //         return true;
+    //     //     } else {
+    //     //         return false;
+    //     //     }
+    //     // } catch (SQLException e) {
+    //     //     System.out.println("Database error while checking email. Please try again later.");
+    //     //     e.printStackTrace();
+    //     // }
 
-        // return false;
-    }
+    //     // return false;
+    // }
 
     public String setValidPassword() {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";

@@ -4,11 +4,7 @@ import menu.CustomerMenu;
 import model.Trip;
 
 public class Main {
-public interface util1{
-   String setValidPassword();
-   void updateName();
-   int saveToDB();
-}
+
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {

@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 import model.DiscountPass;
 
-public class Passenger {
+public class Passenger extends Customer{
 
     private int id;
     private String name;
@@ -74,7 +74,7 @@ public class Passenger {
         this.associatedWith = customerID;
 
         // Call the method to add the passenger to the database
-        addPassengerToDB(this.name, this.phoneNumber, this.email, this.dob, this.discountPassId, this.associatedWith);
+       this.id= this.saveToDB();
     }
 
     // Parameterized constructor
@@ -107,9 +107,15 @@ public class Passenger {
     }
 
     // Method to add a passenger to the database
-    public void addPassengerToDB(String name, String phoneNumber, String email, Date dob, int discountPassId,
-            int associatedWith) {
+    @Override
+    public int saveToDB() {
         try {
+            String name=this.getName();
+            String phoneNumber=this.getPhoneNumber();
+            String email=this.getEmail();
+            Date dob=this.getDob();
+            int discountPassId=this.getDiscountPassId();
+            int associatedWith=this.getAssociatedWith();
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "INSERT INTO Passenger (PassengerName, PassengerNumber, PassengerEmail, PassengerDOB, DiscountPassID, AssociatedWith) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -121,10 +127,17 @@ public class Passenger {
             preparedStatement.setInt(6, associatedWith);
 
             preparedStatement.executeUpdate();
+            String sql1="SELECT PassengerID FROM Passenger where PassengerEmail=?";
+            PreparedStatement pst=connection.prepareStatement(sql1);
+            pst.setString(1, this.getEmail());
+            ResultSet rs=pst.executeQuery();
+            if(rs.next()){
+                return rs.getInt("PassengerID");
+            }
             System.out.println("Passenger added successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }return -1;
     }
 
     public Passenger getPassengerFromDB(int passengerId) {
@@ -175,6 +188,7 @@ public class Passenger {
     }
 
     // Method to get all emails from the database
+    @Override
     public HashSet<String> getAllEmails() {
         HashSet<String> emailSet = new HashSet<>();
         String sql = "SELECT PassengerEmail FROM Passenger";
