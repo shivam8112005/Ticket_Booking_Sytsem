@@ -1055,6 +1055,7 @@ this.name=newName;
 
     private void viewProfile() {
         try {
+            System.out.println("-------------------------- Personal Details -------------------------");
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "SELECT c.CustomerName, c.CustomerNumber, c.CustomerEmail, c.CustomerDOB, c.DiscountPassID, dp.PassName "
                     +

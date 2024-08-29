@@ -130,6 +130,7 @@ public class Trip {
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
+              //  System.out.println("jenfkje   1 111111111111111");
                 this.tripID = rs.getInt(1);
                 System.out.println("Trip added with ID: " + this.tripID);
                 createSeatsForTrip(this.tripID, busID); // to create seats
@@ -140,6 +141,7 @@ public class Trip {
     }
 
     private void createSeatsForTrip(int tripID, int busID) {
+       // System.out.println("mef jekwfje f  22222222222222222");
         String getSeatsQuery = "SELECT NumberOfSeats FROM Bus WHERE BusID = ?";
         String createTableQuery = "CREATE TABLE IF NOT EXISTS TripSeat_" + tripID + " ("
                 + "SeatNumber INT PRIMARY KEY, "
