@@ -69,7 +69,7 @@ public class AdminMenu {
     public void adminMenu() {
         while (true) {
             System.out.println();
-            System.out.println("Admin Options:");
+            System.out.println("------------------------------- Admin Options ---------------------------");
             // Special functionality for root admin to
             // add other admins
             Thread t=new Thread(this.currentAdmin);

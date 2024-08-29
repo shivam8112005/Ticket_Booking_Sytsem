@@ -412,8 +412,11 @@ String passw=ip.encryptPassword(pass);
             try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
 
                 // Retrieve and display associated passengers
+                //System.out.println("fgernfiernk 11111111111111");
                 Passenger ps = new Passenger('c');
+              //  System.out.println("lgfiernernjn 222222222222222");
                 ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
+              //  System.out.println(passengers);
 
                 if (passengers.isEmpty()) {
                     System.out.println("No associated passengers found.");
@@ -1055,6 +1058,7 @@ this.name=newName;
 
     private void viewProfile() {
         try {
+            System.out.println("-------------------------- Personal Details -------------------------");
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "SELECT c.CustomerName, c.CustomerNumber, c.CustomerEmail, c.CustomerDOB, c.DiscountPassID, dp.PassName "
                     +
@@ -1153,7 +1157,8 @@ this.name=newName;
                 case 6:
                     System.out.print("Enter new Password: ");
                     String newPassword = setValidPassword();
-                    updatePassword(this.id, newPassword);
+                    String n1=ip.encryptPassword(newPassword);
+                    updatePassword(this.id, n1);
                     break;
                 case 7:
                     System.out.println("Exiting...");
