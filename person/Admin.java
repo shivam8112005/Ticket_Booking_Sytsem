@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashSet;
 import java.util.regex.Pattern;
+
+import DataStructure.InputValidator;
+
 import java.util.Scanner;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -19,7 +22,7 @@ public class Admin implements Runnable, util{
     private String username;
     private String password;
     HashSet<String> existingUsernames;
-
+    InputValidator ip=new InputValidator();
     private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private final String dbUser = "root";
     private final String dbPassword = "";
@@ -52,14 +55,15 @@ public class Admin implements Runnable, util{
     public Admin(String username, String password) {
         this.username = username;
         this.password = password;
-
+        String n1=ip.encryptPassword(this.password);
+     //   System.out.println(n1);
         String query = "SELECT id FROM Admin WHERE username = ? AND password = ?";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement pst = connection.prepareStatement(query);
 
             pst.setString(1, this.username);
-            pst.setString(2, this.password);
+            pst.setString(2, n1);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
@@ -80,9 +84,9 @@ public class Admin implements Runnable, util{
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-
+String n1=ip.encryptPassword(this.password);
             pst.setString(1, this.username);
-            pst.setString(2, this.password);
+            pst.setString(2, n1);
             pst.executeUpdate();
 
             // Retrieve the generated ID
@@ -153,13 +157,14 @@ public class Admin implements Runnable, util{
 
     public void updatePassword(int id) {
         String newPassword = setValidPassword();
+        String n1=ip.encryptPassword(newPassword);
         String query = "UPDATE Admin SET password = ? WHERE id = ?";
 
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement pst = connection.prepareStatement(query);
 
-            pst.setString(1, newPassword);
+            pst.setString(1, n1);
             pst.setInt(2, id);
 
             int rowsAffected = pst.executeUpdate();

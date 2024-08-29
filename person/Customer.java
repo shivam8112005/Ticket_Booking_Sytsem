@@ -1157,7 +1157,8 @@ this.name=newName;
                 case 6:
                     System.out.print("Enter new Password: ");
                     String newPassword = setValidPassword();
-                    updatePassword(this.id, newPassword);
+                    String n1=ip.encryptPassword(newPassword);
+                    updatePassword(this.id, n1);
                     break;
                 case 7:
                     System.out.println("Exiting...");
