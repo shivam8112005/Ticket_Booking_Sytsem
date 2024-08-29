@@ -2,7 +2,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+
+import com.mysql.cj.xdevapi.PreparableStatement;
 
 public class TableCleanupTask extends Thread {
 
@@ -48,12 +50,12 @@ public class TableCleanupTask extends Thread {
         try (Statement statement = connection.createStatement()) {
             String deleteTableQuery = "DROP TABLE IF EXISTS " + tableName;
             int rowsAffected = statement.executeUpdate(deleteTableQuery);
-    
+           
             if (rowsAffected == 0) {
                 // No rows were affected, which means the table did not exist or was already deleted
             } else {
                 // Rows were affected, which means the table was successfully deleted
-                System.out.println("Successfully deleted table: " + tableName);
+              //  System.out.println("Successfully deleted table: " + tableName);
             }
         } catch (SQLException e) {
             e.printStackTrace();

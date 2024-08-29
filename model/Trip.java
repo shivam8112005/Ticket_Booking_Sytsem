@@ -377,6 +377,7 @@ public class Trip {
     }
 
     public void printUpcomingTrips() {
+        System.out.println("------------------------------- Trips -----------------------------");
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         String query = "SELECT t.TripID, t.RouteID, t.BusID, t.StartTime, t.EndTime, t.Price, " +
                 "r.StartLocation, r.EndLocation " +
@@ -400,15 +401,41 @@ public class Trip {
                 String startLocation = rs.getString("StartLocation");
                 String endLocation = rs.getString("EndLocation");
 
+               System.out.println("Start Location:  "+startLocation+"  End Location: "+endLocation+"  Price: "+price+"  Trip ID: "+tripID);
+            }System.out.print("Enter tripId to View Details or 0 to return: ");
+            int ch=sc.nextInt();
+            sc.nextLine();
+            if(ch==0){
+                return;
+            } String query1 = "SELECT t.TripID, t.RouteID, t.BusID, t.StartTime, t.EndTime, t.Price, " +
+            "r.StartLocation, r.EndLocation " +
+            "FROM Trip t " +
+            "JOIN Route r ON t.RouteID = r.RouteID " +
+            "WHERE  t.TripID=?";
+            PreparedStatement ps=conn.prepareStatement(query1);
+            ps.setInt(1, ch);
+            ResultSet r=ps.executeQuery();
+            if(r.next()){
+                int tripID = r.getInt("TripID");
+                int routeID = r.getInt("RouteID");
+                int busID = r.getInt("BusID");
+                Timestamp startTime = r.getTimestamp("StartTime");
+                Timestamp endTime = r.getTimestamp("EndTime");
+                double price = r.getDouble("Price");
+                String startLocation = r.getString("StartLocation");
+                String endLocation = r.getString("EndLocation");
                 System.out.println("ID: " + tripID +
-                        ", RouteID: " + routeID +
-                        ", BusID: " + busID +
-                        ", Start Time: " + startTime +
-                        ", End Time: " + endTime +
-                        ", Price: " + price +
-                        ", Start Location: " + startLocation +
-                        ", End Location: " + endLocation);
-            }
+                        "\n RouteID: " + routeID +
+                        "\n BusID: " + busID +
+                        "\n Start Time: " + startTime +
+                        "\n End Time: " + endTime +
+                        "\n Price: " + price +
+                        "\n Start Location: " + startLocation +
+                        "\n End Location: " + endLocation);
+            }else{
+                System.out.println("Invalid Trip Id!");
+            }printUpcomingTrips();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

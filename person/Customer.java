@@ -16,14 +16,21 @@ import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+
+import com.mysql.cj.xdevapi.PreparableStatement;
+
+import java.util.LinkedList;
+
+//import com.mysql.cj.exceptions.ExceptionFactory;
+import java.sql.Clob;
+
 import java.sql.Statement;
 
-
+import java.io.*;
 import model.DiscountPass;
 import model.Ticket;
 
 public class Customer {
-
     private int id;
     private String name;
     private String phoneNumber;
@@ -40,7 +47,7 @@ public class Customer {
     public Customer() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("---Register---");
+        System.out.println("------------------------- Register -----------------------");
 
         System.out.print("Enter Name: ");
         this.name = scanner.nextLine();
@@ -172,7 +179,7 @@ public class Customer {
                 this.id = rs.getInt("CustomerID");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println((e.getMessage()));
         }
     }
 
@@ -276,6 +283,7 @@ public class Customer {
     }
 
     public void bookTicketDisplay() {
+        System.out.println("-------------------------------- Book Ticket -------------------------------");
         Scanner scanner = new Scanner(System.in);
 
         // Step 1: Ask for start location and end location
@@ -313,6 +321,7 @@ public class Customer {
         try {
             departureDate = LocalDateTime.parse(departureDateInput + "T00:00:00",
                     DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
         } catch (DateTimeParseException e) {
             System.out.println("Invalid date format. Please enter the date in yyyy-mm-dd format.");
             return;
@@ -322,14 +331,21 @@ public class Customer {
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String tripQuery = "SELECT t.TripID, r.StartLocation, r.EndLocation, t.Price, t.StartTime, t.EndTime " +
-                    "FROM Trip t " +
-                    "JOIN Route r ON t.RouteID = r.RouteID " +
-                    "WHERE t.RouteID = ? AND DATE(t.StartTime) = ?";
+                   "FROM Trip t " +
+                   "JOIN Route r ON t.RouteID = r.RouteID " +
+                   "WHERE t.RouteID = ? AND DATE(t.StartTime) = ? AND t.StartTime >= NOW() + INTERVAL 10 MINUTE";
             PreparedStatement tripStatement = connection.prepareStatement(tripQuery);
             tripStatement.setInt(1, routeId);
             tripStatement.setTimestamp(2, Timestamp.valueOf(departureDate));
             ResultSet tripResultSet = tripStatement.executeQuery();
-
+            String q1="select tripid from ticket where bookedby=? ";
+            PreparedStatement ps=connection.prepareStatement(q1);
+            ps.setInt(1, this.getID());
+            ResultSet r=ps.executeQuery();
+            HashSet<Integer> hs=new HashSet<>();
+            while(r.next()){
+                hs.add(r.getInt("tripid"));
+            }
             boolean tripsFound = false;
             while (tripResultSet.next()) {
                 tripsFound = true;
@@ -343,7 +359,11 @@ public class Customer {
                 System.out.println();
                 System.out.println("Trip ID: " + tripId);
                 System.out.println("From: " + startLoc + " To: " + endLoc);
-                System.out.println("Price: " + price);
+               if(hs.size()>=3){
+                System.out.println("Price: "+(price/2));
+            }else{
+                System.out.println("Price: "+price);
+            }
                 System.out.println("Start Time: " + startTime);
                 System.out.println("End Time: " + endTime);
                 System.out.println("-----------------------------");
@@ -366,6 +386,8 @@ public class Customer {
 
         // Step 1: Build table name dynamically
         String tableName = "tripseat_" + tripId;
+        //LinkedList<Integer> tid=new LinkedList<>();
+        DataStructure.ArrayList<Integer> tid = new DataStructure.ArrayList<>();
 
         // Step 2: Ask for number of seats to book
         System.out.print("Enter the number of seats to book: ");
@@ -396,6 +418,7 @@ public class Customer {
                 }
 
                 // Book the seats
+                
                 for (int i = 0; i < seatsToBook; i++) {
                     int selectedPassengerID;
                     while (true) {
@@ -412,13 +435,128 @@ public class Customer {
 
                     // Insert the ticket and get the ticket ID
                     int ticketId = getLastInsertedTicketId(connection, tripId, selectedPassengerID);
+                    tid.add(ticketId);
                     updateSeatAvailability(tableName, ticketId);
                 }
+                writeTicket(tid, connection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+            System.out.println("Ticket Booked Successfully.");
         } else {
             System.out.println("Not enough seats available.");
+        }
+    }
+    public void writeTicket(DataStructure.ArrayList<Integer> l, Connection connection){
+        File f=new File("D:/shivam/Tickets");
+        try {
+            FileWriter fw=new FileWriter(f,true);
+            BufferedWriter bw=new BufferedWriter(fw);
+            bw.write("---------------------------- Ticket Details --------------------------");
+            bw.newLine();
+            for(int i=0;i<l.size();i++){
+                String q1 = "select * from ticket where TicketID=?";
+                PreparedStatement pst2 = connection.prepareStatement(q1);
+                pst2.setInt(1, l.get(i));
+               // System.out.println("---------------------------- Ticket Details --------------------------");
+                ResultSet rs2 = pst2.executeQuery();
+                String sql2 = "SELECT * FROM trip where tripID=?";
+                PreparedStatement pst3 = connection.prepareStatement(sql2);
+                if (rs2.next()) {
+                   if(i==0){
+                    bw.write("Ticket ID: " + rs2.getInt("TicketID"));
+                    bw.newLine();
+                    bw.write("Ticket Booking Time: " + rs2.getTimestamp("BookTime"));
+                    bw.newLine();
+                    pst3.setInt(1, rs2.getInt("TripID"));
+                    ResultSet rs3 = pst3.executeQuery();
+        
+                    if (rs3.next()) {
+                        bw.write("Ticket Price: " + rs3.getDouble("Price"));
+                        bw.newLine();
+                        bw.write("------------------------------- trip Details --------------------------");
+                        bw.newLine();
+                        // System.out.println("Trip ID: "+rs3.getInt("TripID"));
+                        bw.write("Trip Start Time: " + rs3.getTimestamp("StartTime"));
+                        bw.newLine();
+                        bw.write("Trip End Time: " + rs3.getTimestamp("EndTime"));
+                        bw.newLine();
+                        String sql3 = "select * from route where RouteID=?";
+                        PreparedStatement pst4 = connection.prepareStatement(sql3);
+                        pst4.setInt(1, rs3.getInt("RouteID"));
+                        ResultSet rs4 = pst4.executeQuery();
+                        if (rs4.next()) {
+                            bw.write("Start Location: " + rs4.getString("StartLocation"));
+                            bw.newLine();
+                            bw.write("End Location: " + rs4.getString("EndLocation"));
+                            bw.newLine();
+                        }
+                    }
+                    bw.write("---------------------------------- Passenger Details ---------------------------");
+                    bw.newLine();
+                   }
+                    
+                    String q="select * from passenger where passengerid=?";
+                    PreparedStatement ps=connection.prepareStatement(q);
+                    String g="select passname from discountpass where discountpassid=?";
+                    PreparedStatement pp=connection.prepareStatement(g);
+                    
+                    ps.setInt(1,rs2.getInt("bookedfor"));
+                    ResultSet r=ps.executeQuery();
+                    if(r.next()){
+                        bw.newLine();
+                        pp.setInt(1,r.getInt("DiscountPassID"));
+                        ResultSet r1=pp.executeQuery();
+                        bw.write((i+1)+". Passenger Name: "+r.getString("passengername"));
+                        bw.newLine();
+                        bw.write("passenger PhoneNumber: "+r.getString("PassengerNumber"));
+                        bw.newLine();
+                        bw.write("Passenger Email: "+r.getString("PassengerEmail"));
+                        bw.newLine();
+                        bw.write("Passenger DOB: "+r.getDate("passengerdob"));
+                        bw.newLine();
+                        bw.write("DiscountPass ID: "+r.getInt("DiscountPassID"));
+                        bw.newLine();
+                       if(r1.next()){
+                        bw.write("DiscountPass Name: "+r1.getString("passname"));
+                        bw.newLine();
+                       }
+                    }
+                  }
+                  bw.flush();
+            }bw.close();
+           
+            System.out.println(l);
+            System.out.println(l.size());
+            insertTicket(f,l);
+            fw=new FileWriter(f,false);
+            fw.write("");
+            fw.flush();
+            fw.close();
+            bw.close();
+           
+            
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            
+        }
+        
+    }
+    public void insertTicket(File f, DataStructure.ArrayList<Integer> tid){
+        String sql="update ticket set ticketcontent=? where ticketid=?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            for(int i=0;i<tid.size();i++){
+                FileReader fr=new FileReader(f);
+            PreparedStatement pst=connection.prepareStatement(sql);
+            pst.setCharacterStream(1, fr);
+            pst.setInt(2, tid.get(i));
+            pst.executeUpdate();
+            System.out.println(i);
+            fr.close();
+        }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
 
@@ -470,11 +608,21 @@ public class Customer {
 
     private int getLastInsertedTicketId(Connection connection, int tripId, int selectedPassengerID) {
         try {
-            String sql = "INSERT INTO ticket (TripID, BookedBy, BookedFor, BookTime) VALUES (?, ?, ?, NOW())";
+            String sql = "INSERT INTO ticket (TripID, BookedBy, BookedFor, BookTime, ticketcontent) VALUES (?, ?, ?, NOW(), ?)";
             try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt.setInt(1, tripId);
                 pstmt.setInt(2, this.id);
                 pstmt.setInt(3, selectedPassengerID);
+                File f=new File("D:/shivam/temp.txt");
+                 
+                try {
+                    FileReader  fr=new FileReader(f);
+                     pstmt.setCharacterStream(4, fr);
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
 
                 pstmt.executeUpdate();
 
@@ -493,11 +641,13 @@ public class Customer {
     }
 
     public void printBookedTicketHistory() {
+        System.out.println("----------------------------- Booket Ticket History ----------------------");
         int bookedById = this.id;
+        Scanner sc=new Scanner(System.in);
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             // SQL query to get ticket history with joins
-            String sql = "SELECT t.TicketID, t.TripID, r.StartLocation, r.EndLocation, " +
+            String sql = "SELECT t.ticketcontent, t.TicketID, t.TripID, r.StartLocation, r.EndLocation, " +
                     "tr.StartTime, tr.EndTime, " +
                     "c.CustomerName AS BookedByName, " +
                     "p.PassengerName AS BookedForName " +
@@ -523,22 +673,81 @@ public class Customer {
                 String bookedByName = resultSet.getString("BookedByName");
                 String bookedForName = resultSet.getString("BookedForName");
 
-                System.out.println();
-                System.out.println("Ticket ID: " + ticketId);
-                System.out.println("Trip ID: " + tripId);
-                System.out.println("From: " + startLocation + " To: " + endLocation);
-                System.out.println("Start Time: " + startTime);
-                System.out.println("End Time: " + endTime);
-                System.out.println("Booked By: " + bookedByName);
-                System.out.println("Booked For: " + bookedForName);
-                System.out.println("-----------------------------");
+                
+                System.out.println("Ticket ID: " + ticketId+"  From: " + startLocation + " To: " + endLocation+"  Start Time: " + startTime+"  End Time: " + endTime);
+               
+            }System.out.print("Enter Ticket ID to View and Download ticket(Enter 0 to return): ");
+            int ch=sc.nextInt();
+            sc.nextLine();
+            String q1 = "SELECT t.ticketcontent, t.TicketID, t.TripID, r.StartLocation, r.EndLocation, " +
+            "tr.StartTime, tr.EndTime, " +
+            "c.CustomerName AS BookedByName, " +
+            "p.PassengerName AS BookedForName " +
+            "FROM Ticket t " +
+            "JOIN Trip tr ON t.TripID = tr.TripID " +
+            "JOIN Route r ON tr.RouteID = r.RouteID " +
+            "JOIN Customer c ON t.BookedBy = c.CustomerID " +
+            "JOIN Passenger p ON t.BookedFor = p.PassengerID " +
+            "WHERE t.BookedBy = ? and t.ticketid= ?";
+            PreparedStatement pt=connection.prepareStatement(q1);
+            pt.setInt(1,bookedById);
+            pt.setInt(2, ch);
+            ResultSet rs=pt.executeQuery();
+            if(rs.next()){
+                Clob c=rs.getClob("ticketcontent");
+                Reader r=c.getCharacterStream();
+                BufferedReader br=new BufferedReader(r);
+                String s;
+                try {
+                    s = br.readLine();
+                    while(s!=null){
+                        System.out.println(s);
+                        s=br.readLine();
+                    }
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }System.out.print("Download ?(yes/no): ");
+                String choice=sc.next();
+                if(choice.equalsIgnoreCase("yes")){
+                    System.out.print("Enter File Name you want save your ticket as: ");
+                    sc.nextLine();
+                    String fn=sc.nextLine();
+                    try {
+                        FileWriter fw=new FileWriter("D:/shivam/"+fn+".txt");
+                        Clob c1=rs.getClob("ticketcontent");
+                        Reader r1=c1.getCharacterStream();
+                        BufferedReader br1=new BufferedReader(r1);
+                        BufferedWriter bw=new BufferedWriter(fw);
+                        String s1=br1.readLine();
+                        while(s1!=null){
+                            bw.write(s1);
+                            bw.newLine();
+                            bw.flush();
+                            s1=br1.readLine();
+                        }
+                        fw.close();
+                        r1.close();
+                        br1.close();
+                        bw.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                }
+
+               
+
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void upcomingJourneys() throws Exception {
+        System.out.println("------------------------------- Upcoming Journeys ------------------------------");
         Scanner sc = new Scanner(System.in);
         Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
@@ -572,10 +781,10 @@ public class Customer {
         }
         System.out.print("Enter Ticket ID to view Ticket Details:");
         int ch = sc.nextInt();
-        while (ch < 1 || ch >= i) {// this part is causing problems
-            System.out.println("Enter Valid Ticket ID!");
-            ch = sc.nextInt();
-        }
+        // while (ch < 1 || ch >= i) {// this part is causing problems
+        //     System.out.println("Enter Valid Ticket ID!");
+        //     ch = sc.nextInt();
+        // }
         if (ch == 0) {
             return;
         }
@@ -607,19 +816,31 @@ public class Customer {
                     System.out.println("End Location: " + rs4.getString("EndLocation"));
                 }
             }
+            System.out.println("---------------------------------- Passenger Details ---------------------------");
+            String q="select * from passenger where passengerid=?";
+            PreparedStatement ps=connection.prepareStatement(q);
+            String g="select passname from discountpass where discountpassid=?";
+            PreparedStatement pp=connection.prepareStatement(g);
+            
+            ps.setInt(1,rs2.getInt("bookedfor"));
+            ResultSet r=ps.executeQuery();
+            if(r.next()){
+                pp.setInt(1,r.getInt("DiscountPassID"));
+                ResultSet r1=pp.executeQuery();
+                System.out.println("Passenger Name: "+r.getString("passengername"));
+                System.out.println("passenger PhoneNumber: "+r.getString("PassengerNumber"));
+                System.out.println("Passenger Email: "+r.getString("PassengerEmail"));
+                System.out.println("Passenger DOB: "+r.getDate("passengerdob"));
+                System.out.println("DiscountPass ID: "+r.getInt("DiscountPassID"));
+               if(r1.next()){
+                System.out.println("DiscountPass Name: "+r1.getString("passname"));
+               }
+            }
+          }else{
+            System.out.println("Invalid Ticket ID!");
+          }upcomingJourneys();
         }
-        System.out.println("------------------------------------ Passenger Details ---------------------------");
-        pst1.setInt(1, ch);
-        ResultSet r = pst1.executeQuery();
-        if (r.next()) {
-            System.out.println("Passenger Name: " + r.getString("PassengerName"));
-            System.out.println("Passenger Mobile number: " + r.getString("PassengerNumber"));
-            System.out.println("Passenger Email: " + r.getString("PassengerEmail"));
-            System.out.println("Passenger DOB: " + r.getDate("PassengerDOB"));
-            System.out.println("Passenger Discount pass ID: " + r.getInt("DiscountPassID "));
-        }
-    }
-
+        
     public HashSet<String> getAllPhoneNumbers() {
         HashSet<String> phoneNumberSet = new HashSet<>();
         String sql = "SELECT CustomerNumber FROM Customer";
@@ -783,7 +1004,8 @@ public class Customer {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\nProfile Menu:");
+            System.out.println();
+            System.out.println("------------------------- Profile Menu -----------------------");
             System.out.println("1. View Profile");
             System.out.println("2. Update Details");
             System.out.println("3. Add Passenger");
