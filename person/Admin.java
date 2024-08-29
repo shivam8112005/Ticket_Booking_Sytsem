@@ -12,26 +12,29 @@ import java.sql.SQLException;
 
 import menu.AdminMenu;
 
-public class Admin {
+public class Admin implements Runnable{
     private Scanner scanner = new Scanner(System.in);
 
     private int adminId;
     private String username;
     private String password;
+    HashSet<String> existingUsernames;
 
     private final String url = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private final String dbUser = "root";
     private final String dbPassword = "";
+    public void run(){
+        this.existingUsernames=  getAllUsernames();
+    }
 
-    public Admin() {
-        HashSet<String> existingUsernames = getAllUsernames();
-
+    public Admin(Admin a) {
+      
         while (true) {
             System.out.print("Enter username: ");
             this.username = scanner.next();
             scanner.nextLine(); // Consume newline
 
-            if (existingUsernames.contains(this.username)) {
+            if (a.existingUsernames.contains(this.username)) {
                 System.out.println("Username already exists. Please choose another one.");
             } else {
                 break;
@@ -39,7 +42,7 @@ public class Admin {
         }
 
         this.password = setValidPassword();
-        this.adminId = saveToDB(username, this.password);
+        this.adminId = saveToDB();
     }
 
     public Admin(int a) {
@@ -72,14 +75,14 @@ public class Admin {
         }
     }
 
-    public int saveToDB(String username, String password) {
+    public int saveToDB() {
         String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement pst = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-            pst.setString(1, username);
-            pst.setString(2, password);
+            pst.setString(1, this.username);
+            pst.setString(2, this.password);
             pst.executeUpdate();
 
             // Retrieve the generated ID
@@ -114,8 +117,8 @@ public class Admin {
         }
     }
 
-    public void updateUsername(int id) {
-        HashSet<String> existingUsernames = getAllUsernames();
+    public void updateName() {
+       
 
         while (true) {
             System.out.print("Enter new username: ");
@@ -129,14 +132,14 @@ public class Admin {
                     PreparedStatement pst = connection.prepareStatement(query);
 
                     pst.setString(1, newUsername);
-                    pst.setInt(2, id);
+                    pst.setInt(2, this.getAdminId());
 
                     int rowsAffected = pst.executeUpdate();
                     if (rowsAffected > 0) {
                         System.out.println("Username updated successfully.");
                         break; // Exit loop after successful update
                     } else {
-                        System.out.println("No record found with ID: " + id);
+                        System.out.println("No record found with ID: " + this.getAdminId());
                         break; // Exit loop on error
                     }
 
