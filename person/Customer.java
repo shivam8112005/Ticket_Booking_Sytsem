@@ -28,10 +28,10 @@ import java.sql.Statement;
 
 import java.io.*;
 import model.DiscountPass;
-import model.Ticket;
 
 
-public class Customer{
+
+public class Customer implements util{
     private int id;
     private String name;
     private String phoneNumber;
@@ -158,6 +158,7 @@ public class Customer{
     }
 
     // Method to add a customer to the database
+    @Override
     public int saveToDB() {
         try {
             String name=this.getName();
@@ -887,6 +888,7 @@ public class Customer{
     }
 
     // Method to update the name
+    @Override
     public void updateName() {
         System.out.print("Enter new Name: ");
                     String newName = scanner.nextLine();

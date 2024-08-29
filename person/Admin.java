@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 import menu.AdminMenu;
 
-public class Admin implements Runnable{
+public class Admin implements Runnable, util{
     private Scanner scanner = new Scanner(System.in);
 
     private int adminId;
