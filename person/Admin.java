@@ -74,7 +74,7 @@ public class Admin implements Runnable, util{
             System.out.println("Error during login: " + e.getMessage());
         }
     }
-
+@Override
     public int saveToDB() {
         String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
         try {
@@ -100,7 +100,7 @@ public class Admin implements Runnable, util{
             return -1; // using -1 to indicate error
         }
     }
-
+@Override
     public String setValidPassword() {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
         String pass;
@@ -116,7 +116,7 @@ public class Admin implements Runnable, util{
             }
         }
     }
-
+@Override
     public void updateName() {
        
 

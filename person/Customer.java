@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 import com.mysql.cj.xdevapi.PreparableStatement;
 
+import DataStructure.InputValidator;
+
 import java.util.LinkedList;
 
 //import com.mysql.cj.exceptions.ExceptionFactory;
@@ -39,12 +41,12 @@ public class Customer implements util{
     private String email;
     private String userPassword;
     private int discountPassId;
-
+   // HashSet<String> emailSet;
     private final String URL = "jdbc:mysql://localhost:3306/ticket_booking_db";
     private final String USER = "root";
     private final String PASSWORD = "";
     public static Scanner scanner=new Scanner(System.in);
-
+static InputValidator ip=new InputValidator();
     // No-parameter constructor for register
     public Customer() {
         Scanner scanner = new Scanner(System.in);
@@ -139,7 +141,7 @@ public class Customer implements util{
 
         return email;
     }
-
+@Override
     public String setValidPassword() {
         Scanner scanner = new Scanner(System.in);
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
@@ -164,7 +166,7 @@ public class Customer implements util{
             String name=this.getName();
             String phoneNumber=this.getPhoneNumber();
             String email=this.getEmail();
-            String password=this.getPassword();
+            String password=ip.encryptPassword(this.getPassword());
             Date dob=this.getDob();
             int discountPassId=this.getDiscountPassId();
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -188,7 +190,7 @@ public class Customer implements util{
             }
         } catch (SQLException e) {
             System.out.println((e.getMessage())+" Try Again !");
-            
+           // throw new RuntimeException(e);
         }return -1;
     }
 
@@ -228,13 +230,13 @@ public class Customer implements util{
     // Method to retrieve a customer from the database using the ID
     public Customer loginCustomerFromDB(String email, String pass) {
         Customer customer = null;
-
+String passw=ip.encryptPassword(pass);
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             String sql = "SELECT * FROM Customer WHERE CustomerEmail = ? AND Password = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, email);
-            preparedStatement.setString(2, pass);
+            preparedStatement.setString(2, passw);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -1016,6 +1018,7 @@ this.name=newName;
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
+            
             System.out.println();
             System.out.println("------------------------- Profile Menu -----------------------");
             System.out.println("1. View Profile");
