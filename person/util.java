@@ -1,3 +1,4 @@
+
 package person;
 
 public interface util {
@@ -5,3 +6,4 @@ public interface util {
     void updateName();
     int saveToDB();
 }
+
