@@ -412,8 +412,11 @@ String passw=ip.encryptPassword(pass);
             try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
 
                 // Retrieve and display associated passengers
+                //System.out.println("fgernfiernk 11111111111111");
                 Passenger ps = new Passenger('c');
+              //  System.out.println("lgfiernernjn 222222222222222");
                 ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
+              //  System.out.println(passengers);
 
                 if (passengers.isEmpty()) {
                     System.out.println("No associated passengers found.");

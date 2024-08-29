@@ -28,6 +28,7 @@ public class Passenger extends Customer{
 
     // No-parameter constructor
     public Passenger(int customerID) {
+        super(-1);
         Scanner scanner = new Scanner(System.in);
 
         HashSet<String> phoneNumberSet = getAllPhoneNumbers();
@@ -80,6 +81,7 @@ public class Passenger extends Customer{
     // Parameterized constructor
     public Passenger(int id, String name, String phoneNumber, String email, Date dob, int discountPassId,
             int associatedWith) {
+                super(-1);
         this.id = id;
         this.name = name;
 
@@ -94,6 +96,7 @@ public class Passenger extends Customer{
 
     public Passenger(char c) {
         // A constructor that is only to access methods
+        super(-1);
     }
 
     // Method to validate the phone number (example validation for 10-digit numbers)
