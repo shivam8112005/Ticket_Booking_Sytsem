@@ -349,14 +349,14 @@ String passw=ip.encryptPassword(pass);
             tripStatement.setInt(1, routeId);
             tripStatement.setTimestamp(2, Timestamp.valueOf(departureDate));
             ResultSet tripResultSet = tripStatement.executeQuery();
-            String q1="select tripid from ticket where bookedby=? ";
-            PreparedStatement ps=connection.prepareStatement(q1);
-            ps.setInt(1, this.getID());
-            ResultSet r=ps.executeQuery();
-            HashSet<Integer> hs=new HashSet<>();
-            while(r.next()){
-                hs.add(r.getInt("tripid"));
-            }
+            // String q1="select tripid from ticket where bookedby=? ";
+            // PreparedStatement ps=connection.prepareStatement(q1);
+            // ps.setInt(1, this.getID());
+            // ResultSet r=ps.executeQuery();
+          //  HashSet<Integer> hs=new HashSet<>();
+            // while(r.next()){
+            //     hs.add(r.getInt("tripid"));
+            // }
             boolean tripsFound = false;
             while (tripResultSet.next()) {
                 tripsFound = true;
@@ -370,18 +370,41 @@ String passw=ip.encryptPassword(pass);
                 System.out.println();
                 System.out.println("Trip ID: " + tripId);
                 System.out.println("From: " + startLoc + " To: " + endLoc);
-               if(hs.size()>=3){
-                System.out.println("Price: "+(price/2));
-            }else{
-                System.out.println("Price: "+price);
-            }
+            //    if(hs.size()>=3){
+            //     System.out.println("Price: "+(price/2));
+            // }else{
+            //     System.out.println("Price: "+price);
+            // }
                 System.out.println("Start Time: " + startTime);
                 System.out.println("End Time: " + endTime);
                 System.out.println("-----------------------------");
 
                 // Call the ticketProcessing method for each trip found
-                ticketProcessing(tripId);
+                
             }
+            System.out.print("Enter Trip Id to Book Ticket: ");
+            int n=scanner.nextInt();
+            String tripQuery1 = "SELECT t.TripID, r.StartLocation, r.EndLocation, t.Price, t.StartTime, t.EndTime " +
+                   "FROM Trip t " +
+                   "JOIN Route r ON t.RouteID = r.RouteID " +
+                   "WHERE t.TripId= ? AND t.RouteID = ? AND DATE(t.StartTime) = ? AND t.StartTime >= NOW() + INTERVAL 10 MINUTE";
+            PreparedStatement tripStatement1 = connection.prepareStatement(tripQuery1);
+            tripStatement1.setInt(1, n);
+            tripStatement1.setInt(2, routeId);
+            tripStatement1.setTimestamp(3, Timestamp.valueOf(departureDate));
+            ResultSet tripResultSet1 = tripStatement1.executeQuery();
+            while(!tripResultSet1.next()){
+                System.out.print("Invalid Trip Id ! enter Trip ID or 0 to return: ");
+                n=scanner.nextInt();
+                if(n==0){
+                    return;
+                }
+                tripStatement1.setInt(1, n);
+            tripStatement1.setInt(2, routeId);
+            tripStatement1.setTimestamp(3, Timestamp.valueOf(departureDate));
+            tripResultSet1 = tripStatement1.executeQuery();
+            }
+            ticketProcessing(n);
 
             if (!tripsFound) {
                 System.out.println("No trips found for the selected date and route.");
@@ -394,6 +417,8 @@ String passw=ip.encryptPassword(pass);
 
     private void ticketProcessing(int tripId) {
         Scanner scanner = new Scanner(System.in);
+       
+
 
         // Step 1: Build table name dynamically
         String tableName = "tripseat_" + tripId;
@@ -417,23 +442,42 @@ String passw=ip.encryptPassword(pass);
               //  System.out.println("lgfiernernjn 222222222222222");
               DataStructure.ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
               //  System.out.println(passengers);
-
-                if (passengers.isEmpty()) {
-                    System.out.println("No associated passengers found.");
-                    return;
-                }
+           //   System.out.println(passengers);
+        //    String s="n";
+        //         if (passengers.isEmpty()) {
+        //             System.out.println("No associated passengers found.");
+        //             System.out.print("Add passenger + (y/n)?: ");
+        //              s=scanner.next();
+        //             if(s.equalsIgnoreCase("y")){
+        //                 Passenger p=new Passenger(this.id);
+        //                 int ticketId = getLastInsertedTicketId(connection, tripId, p.getID());
+        //             tid.add(ticketId);
+        //             updateSeatAvailability(tableName, ticketId);
+        //             }else{
+        //                 return;
+        //             }
+        //         }
 
                 // Create a HashSet to store valid passenger IDs
                 HashSet<Integer> validPassengerIDs = new HashSet<>();
                 System.out.println("Select a passenger for each ticket:");
-                for (int i=0;i<passengers.size();i++) {
-                    System.out.println("Passenger ID: " + passengers.get(i).getID() + ", Name: " + passengers.get(i).getName());
-                    validPassengerIDs.add(passengers.get(i).getID()); // Add IDs to the HashSet
-                }
-
-                // Book the seats
+                // for (int i=0;i<passengers.size();i++) {
+                //     System.out.println("Passenger ID: " + passengers.get(i).getID() + ", Name: " + passengers.get(i).getName());
+                //     validPassengerIDs.add(passengers.get(i).getID()); // Add IDs to the HashSet
+                // }
                 
+                // Book the seats
+                // int j=0;
+                // if(s.equalsIgnoreCase("y")){
+                //     j=1;
+                // }
                 for (int i = 0; i < seatsToBook; i++) {
+                    System.out.println("------------------------------------------");
+                    for (int j=0;j<passengers.size();j++) {
+                        System.out.println("Passenger ID: " + passengers.get(j).getID() + ", Name: " + passengers.get(j).getName());
+                        validPassengerIDs.add(passengers.get(j).getID()); // Add IDs to the HashSet
+                    }System.out.println("0. Add Passenger + :");
+                    System.out.println("------------------------------------------");
                     int selectedPassengerID;
                     while (true) {
                         System.out.print("Enter Passenger ID for ticket " + (i + 1) + ": ");
@@ -442,6 +486,10 @@ String passw=ip.encryptPassword(pass);
 
                         if (validPassengerIDs.contains(selectedPassengerID)) {
                             break; // Exit loop if ID is valid
+                        }else if(selectedPassengerID==0){
+                            Passenger p=new Passenger(this.id);
+                            selectedPassengerID=p.getID();
+                            break;
                         } else {
                             System.out.println("Invalid Passenger ID. Please enter a valid Passenger ID.");
                         }
@@ -540,8 +588,8 @@ String passw=ip.encryptPassword(pass);
                   bw.flush();
             }bw.close();
            
-            System.out.println(l);
-            System.out.println(l.size());
+           // System.out.println(l);
+           // System.out.println(l.size());
             insertTicket(f,l);
             fw=new FileWriter(f,false);
             fw.write("");
@@ -566,7 +614,7 @@ String passw=ip.encryptPassword(pass);
             pst.setCharacterStream(1, fr);
             pst.setInt(2, tid.get(i));
             pst.executeUpdate();
-            System.out.println(i);
+           // System.out.println(i);
             fr.close();
         }
         }catch(Exception e){
@@ -583,6 +631,9 @@ String passw=ip.encryptPassword(pass);
             if (resultSet.next()) {
                 int availableSeats = resultSet.getInt(1);
                 return availableSeats >= seatsRequired;
+            }else{
+                System.out.println("Invalid Trip Id !");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
