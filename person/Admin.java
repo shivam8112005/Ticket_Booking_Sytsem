@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 import menu.AdminMenu;
 
-public class Admin implements Runnable, util{
+public class Admin implements Runnable{
     private Scanner scanner = new Scanner(System.in);
 
     private int adminId;
@@ -78,7 +78,7 @@ public class Admin implements Runnable, util{
             System.out.println("Error during login: " + e.getMessage());
         }
     }
-@Override
+
     public int saveToDB() {
         String query = "INSERT INTO Admin (username, password) VALUES (?, ?)";
         try {
@@ -104,7 +104,7 @@ String n1=ip.encryptPassword(this.password);
             return -1; // using -1 to indicate error
         }
     }
-@Override
+
     public String setValidPassword() {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
         String pass;
@@ -120,7 +120,7 @@ String n1=ip.encryptPassword(this.password);
             }
         }
     }
-@Override
+
     public void updateName() {
        
 

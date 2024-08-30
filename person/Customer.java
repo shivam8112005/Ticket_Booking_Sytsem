@@ -33,7 +33,7 @@ import model.DiscountPass;
 
 
 
-public class Customer implements util{
+public class Customer implements CustomerInterface{
     private int id;
     private String name;
     private String phoneNumber;
@@ -141,7 +141,7 @@ static InputValidator ip=new InputValidator();
 
         return email;
     }
-@Override
+
     public String setValidPassword() {
         Scanner scanner = new Scanner(System.in);
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
@@ -160,7 +160,7 @@ static InputValidator ip=new InputValidator();
     }
 
     // Method to add a customer to the database
-    @Override
+    
     public int saveToDB() {
         try {
             String name=this.getName();
@@ -415,7 +415,7 @@ String passw=ip.encryptPassword(pass);
         }
     }
 
-    private void ticketProcessing(int tripId) {
+    public void ticketProcessing(int tripId) {
         Scanner scanner = new Scanner(System.in);
        
 
@@ -622,7 +622,7 @@ String passw=ip.encryptPassword(pass);
         }
     }
 
-    private boolean checkSeatAvailability(String tableName, int seatsRequired) {
+    public boolean checkSeatAvailability(String tableName, int seatsRequired) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE TicketID IS NULL";
             Statement statement = connection.createStatement();
@@ -641,7 +641,7 @@ String passw=ip.encryptPassword(pass);
         return false;
     }
 
-    private void updateSeatAvailability(String tableName, int ticketId) {
+    public void updateSeatAvailability(String tableName, int ticketId) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             // Step 1: Find the row with NULL TicketID
             String selectSql = "SELECT SeatNumber FROM " + tableName + " WHERE TicketID IS NULL LIMIT 1";
@@ -744,7 +744,7 @@ String passw=ip.encryptPassword(pass);
                
             }if(b){
             System.out.println("No Tickets Booked Yet !");
-            return;}
+        return;}
             System.out.print("Enter Ticket ID to View and Download ticket(Enter 0 to return): ");
             int ch=sc.nextInt();
             sc.nextLine();
@@ -948,7 +948,7 @@ String passw=ip.encryptPassword(pass);
     }
 
     // Method to update the name
-    @Override
+    
     public void updateName() {
         System.out.print("Enter new Name: ");
                     String newName = scanner.nextLine();
