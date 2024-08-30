@@ -316,8 +316,8 @@ public class Passenger extends Customer{
     }
 
     // Method to get a list of passengers associated with a specific customer ID
-    public ArrayList<Passenger> getPassengersByCustomerID(int customerID) {
-        ArrayList<Passenger> passengers = new ArrayList<>();
+    public DataStructure.ArrayList<Passenger> getPassengersByCustomerID(int customerID) {
+        DataStructure.ArrayList<Passenger> passengers = new DataStructure.ArrayList<>();
         String sql = "SELECT * FROM Passenger WHERE AssociatedWith = ?";
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
