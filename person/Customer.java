@@ -398,7 +398,7 @@ String passw=ip.encryptPassword(pass);
         // Step 1: Build table name dynamically
         String tableName = "tripseat_" + tripId;
         //LinkedList<Integer> tid=new LinkedList<>();
-        DataStructure.ArrayList<Integer> tid = new DataStructure.ArrayList<>();
+        DataStructure.LinkedList<Integer> tid = new DataStructure.LinkedList<>();
 
         // Step 2: Ask for number of seats to book
         System.out.print("Enter the number of seats to book: ");
@@ -415,7 +415,7 @@ String passw=ip.encryptPassword(pass);
                 //System.out.println("fgernfiernk 11111111111111");
                 Passenger ps = new Passenger('c');
               //  System.out.println("lgfiernernjn 222222222222222");
-                ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
+              DataStructure.ArrayList<Passenger> passengers = ps.getPassengersByCustomerID(this.id);
               //  System.out.println(passengers);
 
                 if (passengers.isEmpty()) {
@@ -426,9 +426,9 @@ String passw=ip.encryptPassword(pass);
                 // Create a HashSet to store valid passenger IDs
                 HashSet<Integer> validPassengerIDs = new HashSet<>();
                 System.out.println("Select a passenger for each ticket:");
-                for (Passenger passenger : passengers) {
-                    System.out.println("Passenger ID: " + passenger.getID() + ", Name: " + passenger.getName());
-                    validPassengerIDs.add(passenger.getID()); // Add IDs to the HashSet
+                for (int i=0;i<passengers.size();i++) {
+                    System.out.println("Passenger ID: " + passengers.get(i).getID() + ", Name: " + passengers.get(i).getName());
+                    validPassengerIDs.add(passengers.get(i).getID()); // Add IDs to the HashSet
                 }
 
                 // Book the seats
@@ -461,7 +461,7 @@ String passw=ip.encryptPassword(pass);
             System.out.println("Not enough seats available.");
         }
     }
-    public void writeTicket(DataStructure.ArrayList<Integer> l, Connection connection){
+    public void writeTicket(DataStructure.LinkedList<Integer> l, Connection connection){
         File f=new File("D:/shivam/Tickets");
         try {
             FileWriter fw=new FileWriter(f,true);
@@ -557,7 +557,7 @@ String passw=ip.encryptPassword(pass);
         }
         
     }
-    public void insertTicket(File f, DataStructure.ArrayList<Integer> tid){
+    public void insertTicket(File f, DataStructure.LinkedList<Integer> tid){
         String sql="update ticket set ticketcontent=? where ticketid=?";
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             for(int i=0;i<tid.size();i++){
@@ -1178,7 +1178,7 @@ this.name=newName;
         Scanner scanner = new Scanner(System.in);
         Passenger callMethod = new Passenger('a');
 
-        ArrayList<Passenger> passengers = callMethod.getPassengersByCustomerID(this.id);
+        DataStructure.ArrayList<Passenger> passengers = callMethod.getPassengersByCustomerID(this.id);
 
         if (passengers.isEmpty()) {
             System.out.println("No passengers found.");

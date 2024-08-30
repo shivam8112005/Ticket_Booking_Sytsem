@@ -42,4 +42,7 @@ import java.util.Arrays;
             arr = Arrays.copyOf(arr, newCapacity);
         }
     }
+    public boolean isEmpty() {
+        return size == 0;
+    }
 }

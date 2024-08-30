@@ -29,6 +29,19 @@ public class LinkedList<T> {
             current.next = newNode;
         }
     }
+        public T get(int index) {
+            if (index < 0 || index >= size()) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
+            }
+    
+            Node<T> current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+    
+            return current.data;
+        }
+
     public boolean remove(T data) {
         if (head == null) {
             return false;
