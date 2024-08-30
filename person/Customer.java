@@ -727,8 +727,9 @@ String passw=ip.encryptPassword(pass);
             preparedStatement.setInt(1, bookedById);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-
+            boolean b=true;
             while (resultSet.next()) {
+            b=false;
                 int ticketId = resultSet.getInt("TicketID");
                 int tripId = resultSet.getInt("TripID");
                 String startLocation = resultSet.getString("StartLocation");
@@ -741,7 +742,10 @@ String passw=ip.encryptPassword(pass);
                 
                 System.out.println("Ticket ID: " + ticketId+"  From: " + startLocation + " To: " + endLocation+"  Start Time: " + startTime+"  End Time: " + endTime);
                
-            }System.out.print("Enter Ticket ID to View and Download ticket(Enter 0 to return): ");
+            }if(b){
+            System.out.println("No Tickets Booked Yet !");
+            return;}
+            System.out.print("Enter Ticket ID to View and Download ticket(Enter 0 to return): ");
             int ch=sc.nextInt();
             sc.nextLine();
             String q1 = "SELECT t.ticketcontent, t.TicketID, t.TripID, r.StartLocation, r.EndLocation, " +
