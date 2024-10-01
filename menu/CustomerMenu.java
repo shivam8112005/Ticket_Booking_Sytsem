@@ -2,6 +2,7 @@ package menu;
 
 import java.util.*;
 
+import DataStructure.InputValidator;
 import model.Trip;
 import person.Customer;
 
@@ -9,6 +10,7 @@ public class CustomerMenu {
 
     Customer currentCustomer;
     Scanner sc = new Scanner(System.in);
+    private InputValidator iv = new InputValidator();
     int choice;
 
     public CustomerMenu(int a) {
@@ -36,9 +38,9 @@ public class CustomerMenu {
             System.out.println("2. Login");
             System.out.println("3. Return");
 
-            System.out.print("Enter your choice: ");
-            choice = sc.nextInt();
-            sc.nextLine();
+           
+            choice =  iv.getIntInput("Enter your choice: ",1,3);
+            
             switch (choice) {
                 case 1:
                     this.currentCustomer = new Customer();
@@ -65,6 +67,7 @@ public class CustomerMenu {
             System.out.print("Enter password: ");
             String phone = sc.next();
             this.currentCustomer = new Customer(email,phone);
+           
     }
 
     private void customerMenu() {
@@ -77,9 +80,9 @@ public class CustomerMenu {
             System.out.println("4. View Booked Tickets");
             System.out.println("5. Profile");
             System.out.println("6. Return");
-            System.out.print("Enter you choice: ");
-            int c = sc.nextInt();
-            sc.nextLine();
+            
+            int c = iv.getIntInput("Enter you choice: ",1,6);
+           
             switch (c) {
                 case 1:
                     try {
