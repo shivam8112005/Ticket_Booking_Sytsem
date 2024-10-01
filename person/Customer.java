@@ -17,6 +17,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import com.mysql.cj.protocol.Resultset;
 import com.mysql.cj.xdevapi.PreparableStatement;
 
 import DataStructure.InputValidator;
@@ -46,7 +47,7 @@ public class Customer implements CustomerInterface{
     private final String USER = "root";
     private final String PASSWORD = "";
     public static Scanner scanner=new Scanner(System.in);
-static InputValidator ip=new InputValidator();
+    private InputValidator ip=new InputValidator();
     // No-parameter constructor for register
     public Customer() {
         Scanner scanner = new Scanner(System.in);
@@ -375,8 +376,26 @@ String passw=ip.encryptPassword(pass);
             // }else{
             //     System.out.println("Price: "+price);
             // }
+            // String q1="select discountpassid from customer where customerid=?";
+            // PreparedStatement pst=connection.prepareStatement(q1);
+            // pst.setInt(1, this.getID());
+            // ResultSet rs=pst.executeQuery();
+            // String sql="select discountpercentage from discountpass where discountpassid=?";
+            // PreparedStatement pst1=connection.prepareStatement(sql);
+            // if(rs.next()){
+            //     int x=(int)(rs.getInt("discountpassid"));
+            //    pst1.setInt(1, x);
+            //     ResultSet rs1=pst1.executeQuery();
+            //     if(rs1.next()){
+            //         double p=rs1.getDouble("discountpassid");
+            //         p/=100; 
+            //         System.out.println("Price: "+p);
+            //     }
+            // }
+            
                 System.out.println("Start Time: " + startTime);
                 System.out.println("End Time: " + endTime);
+               // System.out.println("Price: "+price);
                 System.out.println("-----------------------------");
 
                 // Call the ticketProcessing method for each trip found
@@ -1085,9 +1104,9 @@ this.name=newName;
             System.out.println("4. Update Passenger");
             System.out.println("5. Exit");
 
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            System.out.println();
+            int choice = ip.getIntInput("Enter your choice: ",1,5);
+          //  scanner.nextLine(); // consume newline
 
             switch (choice) {
                 case 1:
