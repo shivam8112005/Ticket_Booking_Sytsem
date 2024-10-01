@@ -3,6 +3,7 @@ package menu;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import DataStructure.InputValidator;
 import model.Bus;
 import model.DiscountPass;
 import model.Trip;
@@ -23,6 +24,7 @@ public class AdminMenu {
     }
 
     private Scanner scanner = new Scanner(System.in);
+    private InputValidator iv = new InputValidator();
     private Admin currentAdmin;
 
     // public void signUpMenu() {
@@ -86,8 +88,8 @@ public class AdminMenu {
             System.out.println("4. Profile");
             System.out.println("5. Logout");
 
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
+            
+            int choice = iv.getIntInput("Enter your choice: ",1,5);
             scanner.nextLine();
 
             switch (choice) {
